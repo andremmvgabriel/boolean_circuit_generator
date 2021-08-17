@@ -23,7 +23,7 @@ private:
 
     int _number_gates = 0;
     int _number_parties = 0;
-    int _number_wires = 0;
+    uint64_t _number_wires = 0;
 
     std::vector<int> _inputs_number_wires;
     std::vector<int> _outputs_number_wires;
@@ -66,10 +66,8 @@ public:
     Variable create_constant(DataType value) {
         Variable output(8 * sizeof(DataType));
 
-        printf("Creating variable with value: %d\n Wires:\n", value);
         for(int i = 0; i < 8 * sizeof(DataType); i++) {
             output.wires[i] = ((value >> i) & 0x01) == 0x00 ? zero_wire : one_wire;
-            printf("   %ld\n", output.wires[i]);
         }
 
         return output;
@@ -95,14 +93,7 @@ public:
         _circuit_file.write(header_l3.c_str(), header_l3.size());
 
         _xor_gate( 0, 0, zero_wire );
-
-        std::string always_1;
-        if (_inputs_number_wires.size() > 0) {
-            always_1 += "1 1 " + std::to_string(_number_wires);
-            always_1 += " " + std::to_string(++_number_wires) + " INV\n";
-        }
-        _circuit_file.write(always_1.c_str(), always_1.size());
-        one_wire = _number_wires;
+        _inv_gate( zero_wire, one_wire );
 
         printf("Zero wire: %lld\n", zero_wire);
         printf("One wire: %lld\n", one_wire);
@@ -156,6 +147,14 @@ public:
         Variable XOR_INV_output(input1.number_wires);
 
         for (int i = 0; i < output.number_wires; i++) {
+            _xor_gate( input1.wires[i], input2.wires[i], XOR_output.wires[i] );
+            _and_gate( input1.wires[i], input2.wires[i], AND_output.wires[i] );
+            _xor_gate( XOR_output.wires[i], Cin.wires[i], XOR_INV_output.wires[i]);
+            _inv_gate( XOR_INV_output.wires[i], output.wires[i] );
+
+            if (i != output.number_wires - 1) {
+                _or_gate(AND_output.wires[i], Cin.wires[i], Cin.wires[i+1]);
+            }
         }
     }
 
@@ -164,7 +163,7 @@ public:
 
         gate += wire_in1 < wire_in2 ? std::to_string(wire_in1) + " " + std::to_string(wire_in2) : std::to_string(wire_in2) + " " + std::to_string(wire_in1);
 
-        wire_out = ++_number_wires;
+        wire_out = _number_wires++;
 
         gate += " " + std::to_string(wire_out) + " XOR\n";
 
@@ -176,7 +175,7 @@ public:
 
         gate += std::to_string(wire_in);
 
-        wire_out = ++_number_wires;
+        wire_out = _number_wires++;
 
         gate += " " + std::to_string(wire_out) + " INV\n";
 
@@ -188,7 +187,7 @@ public:
 
         gate += wire_in1 < wire_in2 ? std::to_string(wire_in1) + " " + std::to_string(wire_in2) : std::to_string(wire_in2) + " " + std::to_string(wire_in1);
 
-        wire_out = ++_number_wires;
+        wire_out = _number_wires++;
 
         gate += " " + std::to_string(wire_out) + " AND\n";
 
@@ -200,7 +199,7 @@ public:
 
         gate += wire_in1 < wire_in2 ? std::to_string(wire_in1) + " " + std::to_string(wire_in2) : std::to_string(wire_in2) + " " + std::to_string(wire_in1);
 
-        wire_out = ++_number_wires;
+        wire_out = _number_wires++;
 
         gate += " " + std::to_string(wire_out) + " OR\n";
 
