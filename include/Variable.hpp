@@ -1,20 +1,17 @@
 #pragma once
 
 #include <stdint.h>
+#include <vector>
 
 class Variable
 {
-private:
-    uint8_t* _wires;
-
 public:
-    const int number_wires;
+    std::vector<uint64_t> wires;
+    uint8_t number_wires;
 
 public:
     Variable() : number_wires(0) {}
-    Variable(int number_bytes) : number_wires(8 * number_bytes) {
-        _wires = new uint8_t[8*number_bytes];
-    }
+    Variable(uint8_t n_bits) : number_wires(n_bits) { wires.resize(n_bits); }
 
-    ~Variable() { delete[] _wires; }
+    virtual ~Variable() {}
 };
