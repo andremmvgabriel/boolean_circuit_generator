@@ -34,6 +34,12 @@ private:
     // Control
     int assigned_wires = 0;
 
+    // Debug
+    uint64_t _counter_xor_gates = 0;
+    uint64_t _counter_inv_gates = 0;
+    uint64_t _counter_and_gates = 0;
+    uint64_t _counter_or_gates = 0;
+
 private:
     CircuitGenerator() {}
 
@@ -99,7 +105,13 @@ public:
         printf("One wire: %lld\n", one_wire);
     }
 
-    void conclude() {}
+    void conclude() {
+        printf("> Final circuit details:\n");
+        printf("   - XOR gates: %lld\n", _counter_xor_gates);
+        printf("   - AND gates: %lld\n", _counter_and_gates);
+        printf("   - INV gates: %lld\n", _counter_inv_gates);
+        printf("   - OR gates: %lld\n", _counter_or_gates);
+    }
 
     void add_input(Variable &input) {
         for (int i = 0; i < input.number_wires; i++) {
@@ -159,6 +171,9 @@ public:
     }
 
     void _xor_gate(const uint64_t& wire_in1, const uint64_t& wire_in2, uint64_t& wire_out) {
+        _number_gates++;
+        _counter_xor_gates++;
+
         std::string gate = "2 1 ";
 
         gate += wire_in1 < wire_in2 ? std::to_string(wire_in1) + " " + std::to_string(wire_in2) : std::to_string(wire_in2) + " " + std::to_string(wire_in1);
@@ -171,6 +186,9 @@ public:
     }
 
     void _inv_gate(const uint64_t& wire_in, uint64_t& wire_out) {
+        _number_gates++;
+        _counter_inv_gates++;
+
         std::string gate = "1 1 ";
 
         gate += std::to_string(wire_in);
@@ -183,6 +201,9 @@ public:
     }
 
     void _and_gate(const uint64_t& wire_in1, const uint64_t& wire_in2, uint64_t& wire_out) {
+        _number_gates++;
+        _counter_and_gates++;
+
         std::string gate = "2 1 ";
 
         gate += wire_in1 < wire_in2 ? std::to_string(wire_in1) + " " + std::to_string(wire_in2) : std::to_string(wire_in2) + " " + std::to_string(wire_in1);
@@ -195,6 +216,9 @@ public:
     }
 
     void _or_gate(const uint64_t& wire_in1, const uint64_t& wire_in2, uint64_t& wire_out) {
+        _number_gates++;
+        _counter_or_gates++;
+
         std::string gate = "2 1 ";
 
         gate += wire_in1 < wire_in2 ? std::to_string(wire_in1) + " " + std::to_string(wire_in2) : std::to_string(wire_in2) + " " + std::to_string(wire_in1);
@@ -207,8 +231,6 @@ public:
     }
 
     void XOR(Variable& input1, Variable& input2, Variable& output) {
-        _number_gates++;
-
         if (input1.number_wires != input2.number_wires && input1.number_wires != output.number_wires) {
             printf("The variables inputted do not share the same size.\n");
         }
@@ -219,8 +241,6 @@ public:
     }
 
     void INV(Variable& input, Variable& output) {
-        _number_gates++;
-
         if (input.number_wires != output.number_wires) {
             printf("The variables inputted do not share the same size.\n");
         }
@@ -231,8 +251,6 @@ public:
     }
 
     void AND(Variable& input1, Variable& input2, Variable& output) {
-        _number_gates++;
-
         if (input1.number_wires != input2.number_wires && input1.number_wires != output.number_wires) {
             printf("The variables inputted do not share the same size.\n");
         }
@@ -243,8 +261,6 @@ public:
     }
 
     void OR(Variable& input1, Variable& input2, Variable& output) {
-        _number_gates++;
-
         if (input1.number_wires != input2.number_wires && input1.number_wires != output.number_wires) {
             printf("The variables inputted do not share the same size.\n");
         }
