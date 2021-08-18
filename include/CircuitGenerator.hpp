@@ -16,7 +16,8 @@ class CircuitGenerator
 {
 private:
     CircuitType _circuit_type;
-    std::fstream _circuit_file;
+    std::ofstream _circuit_file;
+    std::fstream _temp_circuit_file;
 
     int _number_inputs;
     int _number_outputs;
@@ -56,8 +57,13 @@ public:
             circuit_type == CircuitType::BRISTOL ? "Bristol" : "None"
         );
 
-        _circuit_file = std::fstream(
+        _circuit_file = std::ofstream(
             "BristolCircuit.txt",
+            std::ios::out
+        );
+
+        _temp_circuit_file = std::fstream(
+            "TEMP_BristolCircuit.txt",
             std::ios::in | std::ios::out
         );
 
@@ -66,7 +72,7 @@ public:
         }
     }
 
-    ~CircuitGenerator() { printf("Closed.\n"); _circuit_file.close(); }
+    ~CircuitGenerator() { printf("Closed.\n"); _circuit_file.close(); _temp_circuit_file.close(); }
 
     template<typename DataType>
     Variable create_constant(DataType value) {
@@ -80,8 +86,43 @@ public:
     }
 
     void start() {
-        printf("%d\n", _circuit_file.is_open());
+        printf("%d and %d\n", _circuit_file.is_open(), _temp_circuit_file.is_open());
         printf("> Writting...\n");
+
+        /* std::string header = std::to_string(_number_gates) + " " + std::to_string(_number_wires) + "\n";
+        _temp_circuit_file.write(header.c_str(), header.size());
+
+        std::string header_l2 = std::to_string(_inputs_number_wires.size());
+        for (auto & party_wires : _inputs_number_wires) {
+            header_l2 += " " + std::to_string(party_wires);
+        } header_l2 += "\n";
+        _temp_circuit_file.write(header_l2.c_str(), header_l2.size());
+
+        std::string header_l3 = std::to_string(_outputs_number_wires.size());
+        for (auto & party_wires : _outputs_number_wires) {
+            header_l3 += " " + std::to_string(party_wires);
+        } header_l3 += "\n\n";
+        _temp_circuit_file.write(header_l3.c_str(), header_l3.size()); */
+
+        _xor_gate( 0, 0, zero_wire );
+        _inv_gate( zero_wire, one_wire );
+
+        printf("Zero wire: %lld\n", zero_wire);
+        printf("One wire: %lld\n", one_wire);
+    }
+
+    void conclude() {
+        printf("> Final circuit details:\n");
+        printf("   - TOTAL gates: %lld\n", _number_gates);
+        printf("   - TOTAL wires: %lld\n", _number_wires);
+        printf("   - XOR gates: %lld\n", _counter_xor_gates);
+        printf("   - AND gates: %lld\n", _counter_and_gates);
+        printf("   - INV gates: %lld\n", _counter_inv_gates);
+        printf("   - OR gates: %lld\n", _counter_or_gates);
+
+
+
+
 
         std::string header = std::to_string(_number_gates) + " " + std::to_string(_number_wires) + "\n";
         _circuit_file.write(header.c_str(), header.size());
@@ -98,19 +139,14 @@ public:
         } header_l3 += "\n\n";
         _circuit_file.write(header_l3.c_str(), header_l3.size());
 
-        _xor_gate( 0, 0, zero_wire );
-        _inv_gate( zero_wire, one_wire );
+        _temp_circuit_file.seekg(0);
 
-        printf("Zero wire: %lld\n", zero_wire);
-        printf("One wire: %lld\n", one_wire);
-    }
-
-    void conclude() {
-        printf("> Final circuit details:\n");
-        printf("   - XOR gates: %lld\n", _counter_xor_gates);
-        printf("   - AND gates: %lld\n", _counter_and_gates);
-        printf("   - INV gates: %lld\n", _counter_inv_gates);
-        printf("   - OR gates: %lld\n", _counter_or_gates);
+        std::string line;
+        while (std::getline(_temp_circuit_file, line)) {
+            line += "\n";
+            std::cerr << "> Read line: " << line;
+            _circuit_file.write(line.c_str(), line.size());
+        }
     }
 
     void add_input(Variable &input) {
@@ -182,7 +218,7 @@ public:
 
         gate += " " + std::to_string(wire_out) + " XOR\n";
 
-        _circuit_file.write(gate.c_str(), gate.size());
+        _temp_circuit_file.write(gate.c_str(), gate.size());
     }
 
     void _inv_gate(const uint64_t& wire_in, uint64_t& wire_out) {
@@ -197,7 +233,7 @@ public:
 
         gate += " " + std::to_string(wire_out) + " INV\n";
 
-        _circuit_file.write(gate.c_str(), gate.size());
+        _temp_circuit_file.write(gate.c_str(), gate.size());
     }
 
     void _and_gate(const uint64_t& wire_in1, const uint64_t& wire_in2, uint64_t& wire_out) {
@@ -212,7 +248,7 @@ public:
 
         gate += " " + std::to_string(wire_out) + " AND\n";
 
-        _circuit_file.write(gate.c_str(), gate.size());
+        _temp_circuit_file.write(gate.c_str(), gate.size());
     }
 
     void _or_gate(const uint64_t& wire_in1, const uint64_t& wire_in2, uint64_t& wire_out) {
@@ -227,7 +263,7 @@ public:
 
         gate += " " + std::to_string(wire_out) + " OR\n";
 
-        _circuit_file.write(gate.c_str(), gate.size());
+        _temp_circuit_file.write(gate.c_str(), gate.size());
     }
 
     void XOR(Variable& input1, Variable& input2, Variable& output) {
