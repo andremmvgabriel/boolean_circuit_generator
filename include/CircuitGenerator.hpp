@@ -64,7 +64,7 @@ public:
 
         _temp_circuit_file = std::fstream(
             "TEMP_BristolCircuit.txt",
-            std::ios::in | std::ios::out
+            std::ios::in | std::ios::out | std::ios::trunc
         );
 
         for (auto & amount : input_parties_wires) {
@@ -86,23 +86,7 @@ public:
     }
 
     void start() {
-        printf("%d and %d\n", _circuit_file.is_open(), _temp_circuit_file.is_open());
         printf("> Writting...\n");
-
-        /* std::string header = std::to_string(_number_gates) + " " + std::to_string(_number_wires) + "\n";
-        _temp_circuit_file.write(header.c_str(), header.size());
-
-        std::string header_l2 = std::to_string(_inputs_number_wires.size());
-        for (auto & party_wires : _inputs_number_wires) {
-            header_l2 += " " + std::to_string(party_wires);
-        } header_l2 += "\n";
-        _temp_circuit_file.write(header_l2.c_str(), header_l2.size());
-
-        std::string header_l3 = std::to_string(_outputs_number_wires.size());
-        for (auto & party_wires : _outputs_number_wires) {
-            header_l3 += " " + std::to_string(party_wires);
-        } header_l3 += "\n\n";
-        _temp_circuit_file.write(header_l3.c_str(), header_l3.size()); */
 
         _xor_gate( 0, 0, zero_wire );
         _inv_gate( zero_wire, one_wire );
@@ -144,7 +128,6 @@ public:
         std::string line;
         while (std::getline(_temp_circuit_file, line)) {
             line += "\n";
-            std::cerr << "> Read line: " << line;
             _circuit_file.write(line.c_str(), line.size());
         }
     }
@@ -175,33 +158,57 @@ public:
     1   0   1   |   0   1
     1   1   0   |   0   1
     1   1   1   |   1   1
-    
-    A|----- (...)       --A--|               --1----|
-                             |XOR|--1--             |XOR|--|INV|--O--
-                        --B--|               --Cin--|
-    B|----- (...)
-                        --A--|               --2----|
-                             |AND|--2--             |OR|------Cout---
-    Cin|--- (...)       --B--|               --Cin--|
-
     */
     void addition(Variable& input1, Variable& input2, Variable& output) {
         printf("> Addition...\n");
 
-        Variable Cin = create_constant((uint8_t)0x00);
+        Variable c_var = create_constant<uint64_t>(0x00);
 
-        Variable XOR_output(input1.number_wires);
-        Variable AND_output(input1.number_wires);
-        Variable XOR_INV_output(input1.number_wires);
+        Variable a_xor_b(input1.number_wires);
+        Variable a_and_b(input1.number_wires);
+        Variable a_xor_b_and_c(input1.number_wires);
 
         for (int i = 0; i < output.number_wires; i++) {
-            _xor_gate( input1.wires[i], input2.wires[i], XOR_output.wires[i] );
-            _and_gate( input1.wires[i], input2.wires[i], AND_output.wires[i] );
-            _xor_gate( XOR_output.wires[i], Cin.wires[i], XOR_INV_output.wires[i]);
-            _inv_gate( XOR_INV_output.wires[i], output.wires[i] );
-
+            _xor_gate( input1.wires[i], input2.wires[i], a_xor_b.wires[i] );
+            _xor_gate( a_xor_b.wires[i], c_var.wires[i], output.wires[i] );
             if (i != output.number_wires - 1) {
-                _or_gate(AND_output.wires[i], Cin.wires[i], Cin.wires[i+1]);
+                _and_gate( input1.wires[i], input2.wires[i], a_and_b.wires[i] );
+                _and_gate( a_xor_b.wires[i], c_var.wires[i], a_xor_b_and_c.wires[i] );
+                _or_gate( a_and_b.wires[i], a_xor_b_and_c.wires[i], c_var.wires[i+1] );
+            }
+        }
+    }
+
+    /*
+    Truth table:
+
+    A   B   Cin |   O   Cout
+    ------------------------
+    0   0   0   |   0   0
+    0   0   1   |   1   1
+    0   1   0   |   1   1
+    0   1   1   |   0   1
+    1   0   0   |   1   0
+    1   0   1   |   0   0
+    1   1   0   |   0   0
+    1   1   1   |   1   1
+    */
+    void addition(Variable& input1, Variable& input2, Variable& output) {
+        printf("> Addition...\n");
+
+        Variable c_var = create_constant<uint64_t>(0x00);
+
+        Variable a_xor_b(input1.number_wires);
+        Variable a_and_b(input1.number_wires);
+        Variable a_xor_b_and_c(input1.number_wires);
+
+        for (int i = 0; i < output.number_wires; i++) {
+            _xor_gate( input1.wires[i], input2.wires[i], a_xor_b.wires[i] );
+            _xor_gate( a_xor_b.wires[i], c_var.wires[i], output.wires[i] );
+            if (i != output.number_wires - 1) {
+                _and_gate( input1.wires[i], input2.wires[i], a_and_b.wires[i] );
+                _and_gate( a_xor_b.wires[i], c_var.wires[i], a_xor_b_and_c.wires[i] );
+                _or_gate( a_and_b.wires[i], a_xor_b_and_c.wires[i], c_var.wires[i+1] );
             }
         }
     }
