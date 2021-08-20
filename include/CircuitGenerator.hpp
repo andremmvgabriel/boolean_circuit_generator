@@ -193,7 +193,7 @@ public:
     1   1   0   |   0   0
     1   1   1   |   1   1
     */
-    void addition(Variable& input1, Variable& input2, Variable& output) {
+    void subtraction(Variable& input1, Variable& input2, Variable& output) {
         printf("> Addition...\n");
 
         Variable c_var = create_constant<uint64_t>(0x00);
