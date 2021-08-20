@@ -3,10 +3,17 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <sstream>
 
 #include <unordered_map>
 
-class CircuitTester
+class Circuit
+{
+public:
+    virtual ~Circuit() {}
+};
+
+class CircuitTester : virtual public Circuit
 {
 public:
     void run(const std::string &circuit, const std::string &inputs) {
@@ -25,53 +32,108 @@ public:
 
         // 1st line
         std::getline(circuit_file, line);
-        found = line.find(" ");
-        std::string gates(line.begin(), line.begin()+found);
-        std::string wires(line.begin()+found, line.end());
-        number_gates = std::stoi(gates);
-        number_gates = std::stoi(wires);
-
-        for (int i = 0; i < number_gates; i++) {
-            wires_values[i] = 0x00;
-        }
+        std::stringstream first_line(line);
+        first_line >> number_gates >> number_wires;
 
         // 2nd line
         std::getline(circuit_file, line);
-        found = line.find(" ");
-        std::string number_input_parties(line.begin(), line.begin()+found);
-        input_wires.resize( std::stoi(number_input_parties) );
-        line = std::string(line.begin()+found+1, line.end());
-        found = line.find(" ");
-        std::string input_size1(line.begin(), line.begin()+found);
-        std::string input_size2(line.begin()+found+1, line.end());
-        input_wires.at(0) = std::stoi(input_size1);
-        input_wires.at(1) = std::stoi(input_size2);
+        std::stringstream second_line(line);
+        int number_input_parties;
+        second_line >> number_input_parties;
+        for (int i = 0; i < number_input_parties; i++) {
+            int party_wires;
+            second_line >> party_wires;
+            input_wires.push_back( party_wires );
+        }
 
         // 3rd line
         std::getline(circuit_file, line);
-        found = line.find(" ");
-        std::string number_output_parties(line.begin(), line.begin()+found);
-        outputs_wires.resize( std::stoi(number_output_parties) );
-        line = std::string(line.begin()+found+1, line.end());
-        outputs_wires.at(0) = std::stoi(line);
+        std::stringstream third_line(line);
+        int number_output_parties;
+        third_line >> number_output_parties;
+        for (int i = 0; i < number_output_parties; i++) {
+            int party_wires;
+            third_line >> party_wires;
+            outputs_wires.push_back( party_wires );
+        }
 
         // 4th line
-        std::getline(circuit_file, line);
+        std::getline(circuit_file, line); // Ignores this line
 
         printf("> Circuit Info:\n");
         printf("   - Number gates: %d\n", number_gates);
         printf("   - Number wires: %d\n", number_wires);
+        printf("   - Number input parties: %d\n", input_wires.size());
+        for (int i = 0; i < input_wires.size(); i++) {
+            printf("      - Party %d number wires: %d\n", i, input_wires.at(i));
+        }
+        printf("   - Number output parties: %d\n", outputs_wires.size());
+        for (int i = 0; i < outputs_wires.size(); i++) {
+            printf("      - Party %d number wires: %d\n", i, outputs_wires.at(i));
+        }
+
+        for (int i = 0; i < input_wires.size(); i++) {
+            for (int j = 0; j < input_wires.at(i); j++) {
+                std::getline(inputs_file, line);
+                wires_values[i == 0 ? j : j + i * input_wires.at(i-1)] = (uint8_t)(std::stoi(line));
+            }
+        }
+
+        printf("\n");
+
+        for (int i = 0; i < input_wires.size(); i++) {
+            printf("> Party %d wires values: ", i);
+            for (int j = 0; j < input_wires.at(i); j++) {
+                //printf("%d ", wires_values.at(i == 0 ? j : j + i * input_wires.at(i-1)));
+                printf("%d ", wires_values.at(i == 0 ? j : j + i * input_wires.at(i-1)));
+            } printf("\n");
+        }
+
+        // Performing the circuit (ON THE LOOP)
+        while (std::getline(circuit_file, line)) {
+            std::stringstream gate_info (line);
+
+            int number_input_wires;
+            int number_output_wires;
+
+            gate_info >> number_input_wires >> number_output_wires;
+
+            // ATM ONLY CONSIDERING 1 OUTPUT WIRE ALWAYS
+            if (number_input_wires == 1) {
+                uint64_t wire_in;
+                uint64_t wire_out;
+                std::string gate;
+                gate_info >> wire_in >> wire_out >> gate;
+                uint8_t value_wire_in = wires_values.at(wire_in);
+                if (gate == "INV") {
+                    wires_values[wire_out] = !value_wire_in;
+                }
+                printf("   - %s: a(%ld)=%d ; o(%ld)=%d\n", gate.c_str(), wire_in, wires_values.at(wire_in), wire_out, wires_values.at(wire_out));
+            } else if (number_input_wires == 2) {
+                uint64_t wire_in1;
+                uint64_t wire_in2;
+                uint64_t wire_out;
+                std::string gate;
+                gate_info >> wire_in1 >> wire_in2 >> wire_out >> gate;
+                uint8_t value_wire_in1 = wires_values.at(wire_in1);
+                uint8_t value_wire_in2 = wires_values.at(wire_in2);
+                if (gate == "AND") {
+                    wires_values[wire_out] = value_wire_in1 & value_wire_in2;
+                } else if (gate == "OR") {
+                    wires_values[wire_out] = value_wire_in1 | value_wire_in2;
+                } else if (gate == "XOR") {
+                    wires_values[wire_out] = value_wire_in1 ^ value_wire_in2;
+                }
+                printf("   - %s: a(%ld)=%d ; b(%ld)=%d ; o(%ld)=%d\n", gate.c_str(), wire_in1, wires_values.at(wire_in1), wire_in2, wires_values.at(wire_in2), wire_out, wires_values.at(wire_out));
+            }
+        }
+
+        printf("> Output wires values : ");
+        for (int j = outputs_wires.at(0); j > 0 ; j--) {
+            printf("%d ", wires_values.at( number_wires - j ) );
+        } printf("\n");
+
         /*
-        for (int i = 0; i < input_wires.at(0); i++) {
-            std::getline(inputs_file, line);
-            wires_values.at(i) = (uint8_t)(std::stoi(line));
-        }
-
-        for (int i = 0; i < input_wires.at(1); i++) {
-            std::getline(inputs_file, line);
-            wires_values.at(i + input_wires.at(0)) = (uint8_t)(std::stoi(line));
-        }
-
         while (std::getline(circuit_file, line)) {
             int n_in_wires = std::stoi( std::string(line.begin(), line.begin()+1) );
             int n_out_wires = std::stoi( std::string(line.begin()+2, line.begin()+3) );
