@@ -26,7 +26,8 @@ int main() {
     circuit_generator.AND(output, test, output);
     circuit_generator.OR(output, test, output); */
 
-    circuit_generator.addition( input1, input2, output );
+    //circuit_generator.addition( input1, input2, output );
+    circuit_generator.subtraction( input1, input2, output );
 
     circuit_generator.conclude();
 

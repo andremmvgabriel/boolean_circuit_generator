@@ -189,25 +189,34 @@ public:
     1   1   0   |   0   0
     1   1   1   |   1   1
     */
-    /* void addition(Variable& input1, Variable& input2, Variable& output) {
-        printf("> Addition...\n");
+    void subtraction(Variable& input1, Variable& input2, Variable& output) {
+        printf("> Subtraction...\n");
 
-        Variable c_var = create_constant<uint64_t>(0x00);
+        Variable c_io = create_constant(output.number_wires, 0x00);
 
-        Variable a_xor_b(input1.number_wires);
-        Variable a_and_b(input1.number_wires);
-        Variable a_xor_b_and_c(input1.number_wires);
+        //Wire wire1, wire2, wire3, wire4, wire5;
+        Variable a_xor_b(output.number_wires);
+        Variable inv_xor(output.number_wires);
+        Variable inv_a(output.number_wires);
+        Variable and_xor(output.number_wires);
+        Variable and_a_c(output.number_wires);
 
         for (int i = 0; i < output.number_wires; i++) {
             _xor_gate( input1.wires[i], input2.wires[i], a_xor_b.wires[i] );
-            _xor_gate( a_xor_b.wires[i], c_var.wires[i], output.wires[i] );
-            if (i != output.number_wires - 1) {
-                _and_gate( input1.wires[i], input2.wires[i], a_and_b.wires[i] );
-                _and_gate( a_xor_b.wires[i], c_var.wires[i], a_xor_b_and_c.wires[i] );
-                _or_gate( a_and_b.wires[i], a_xor_b_and_c.wires[i], c_var.wires[i+1] );
+            if (i != output.number_wires-1) {
+                _inv_gate( a_xor_b.wires[i], inv_xor.wires[i] );
+                _inv_gate( input1.wires[i], inv_a.wires[i] );
+                _and_gate( inv_xor.wires[i], c_io.wires[i], and_xor.wires[i] );
+                _and_gate( inv_a.wires[i], input2.wires[i], and_a_c.wires[i] );
+                _or_gate( and_xor.wires[i], and_a_c.wires[i], c_io.wires[i+1] );
             }
         }
-    } */
+
+        // Output
+        for (int i = 0; i < output.number_wires; i++) {
+            _xor_gate( a_xor_b.wires[i], c_io.wires[i], output.wires[i] );
+        }
+    }
 
     void _xor_gate(const uint64_t& wire_in1, const uint64_t& wire_in2, uint64_t& wire_out) {
         _number_gates++;

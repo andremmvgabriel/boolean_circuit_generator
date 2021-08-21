@@ -28,7 +28,7 @@ Variable CircuitGenerator::create_constant(int n_bits, uint64_t value) {
     Variable variable (n_bits);
 
     for (int i = 0; i < n_bits; i++) {
-        variable.wires[i].id = ((value >> i) & 0x01) == 0 ? zero_wire : one_wire;
+        variable.wires[i].label = ((value >> i) & 0x01) == 0 ? zero_wire : one_wire;
         // variable.wires[i].value = 0;
     }
 
