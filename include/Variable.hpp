@@ -3,15 +3,17 @@
 #include <stdint.h>
 #include <vector>
 
+#include <Wire.hpp>
+
 class Variable
 {
 public:
-    std::vector<uint64_t> wires;
-    uint8_t number_wires;
+    std::vector<Wire> wires;
+    uint8_t number_wires = 0;
 
 public:
-    Variable() : number_wires(0) {}
-    Variable(uint8_t n_bits) : number_wires(n_bits) { wires.resize(n_bits); }
+    Variable();
+    Variable(uint8_t n_bits);
 
-    virtual ~Variable() {}
+    virtual ~Variable();
 };

@@ -6,13 +6,14 @@
 #include <vector>
 
 #include <Variable.hpp>
+//#include <Circuit.hpp>
 
 enum class CircuitType
 {
     BRISTOL
 };
 
-class CircuitGenerator
+class CircuitGenerator// : virtual public Circuit
 {
 private:
     CircuitType _circuit_type;
@@ -42,7 +43,7 @@ private:
     uint64_t _counter_or_gates = 0;
 
 private:
-    CircuitGenerator() {}
+    CircuitGenerator();
 
     void _write_gate(uint64_t in_wire, uint64_t out_wire) {
     }
@@ -51,26 +52,7 @@ private:
     }
 
 public:
-    CircuitGenerator(CircuitType circuit_type, const std::vector<int> &input_parties_wires, const std::vector<int> &output_parties_wires) : _circuit_type(circuit_type), _inputs_number_wires(input_parties_wires), _outputs_number_wires(output_parties_wires) {
-        printf("> Circuit Generator object created.\n");
-        printf("   - Target type: %s.\n\n",
-            circuit_type == CircuitType::BRISTOL ? "Bristol" : "None"
-        );
-
-        _circuit_file = std::ofstream(
-            "BristolCircuit.txt",
-            std::ios::out
-        );
-
-        _temp_circuit_file = std::fstream(
-            "TEMP_BristolCircuit.txt",
-            std::ios::in | std::ios::out | std::ios::trunc
-        );
-
-        for (auto & amount : input_parties_wires) {
-            _number_wires += amount;
-        }
-    }
+    CircuitGenerator(CircuitType circuit_type, const std::vector<int> &input_parties_wires, const std::vector<int> &output_parties_wires);
 
     ~CircuitGenerator() { printf("Closed.\n"); _circuit_file.close(); _temp_circuit_file.close(); }
 
@@ -84,6 +66,8 @@ public:
 
         return output;
     }
+
+    Variable create_constant(int n_bits, uint64_t value);
 
     void start() {
         printf("> Writting...\n");
@@ -162,7 +146,7 @@ public:
     void addition(Variable& input1, Variable& input2, Variable& output) {
         printf("> Addition...\n");
 
-        Variable c_var = create_constant<uint64_t>(0x00);
+        Variable c_var = create_constant(input1.number_wires, 0x00);
 
         Variable a_xor_b(input1.number_wires);
         Variable a_and_b(input1.number_wires);
