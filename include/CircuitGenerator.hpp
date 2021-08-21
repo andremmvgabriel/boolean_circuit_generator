@@ -159,12 +159,17 @@ public:
 
         for (int i = 0; i < output.number_wires; i++) {
             _xor_gate( input1.wires[i], input2.wires[i], a_xor_b.wires[i] );
-            _xor_gate( a_xor_b.wires[i], c_var.wires[i], output.wires[i] );
+            //_xor_gate( a_xor_b.wires[i], c_var.wires[i], output.wires[i] ); // In next for
             if (i != output.number_wires - 1) {
                 _and_gate( input1.wires[i].id, input2.wires[i].id, a_and_b.wires[i].id );
                 _and_gate( a_xor_b.wires[i].id, c_var.wires[i].id, a_xor_b_and_c.wires[i].id );
                 _or_gate( a_and_b.wires[i].id, a_xor_b_and_c.wires[i].id, c_var.wires[i+1].id );
             }
+        }
+
+        // Output
+        for (int i = 0; i < output.number_wires; i++) {
+            _xor_gate( a_xor_b.wires[i], c_var.wires[i], output.wires[i] );
         }
     }
 
@@ -182,9 +187,25 @@ public:
     1   1   0   |   0   0
     1   1   1   |   1   1
     */
-    void subtraction(Variable& input1, Variable& input2, Variable& output) {
-        printf("> Subtraction...\n");
-    }
+    /* void addition(Variable& input1, Variable& input2, Variable& output) {
+        printf("> Addition...\n");
+
+        Variable c_var = create_constant<uint64_t>(0x00);
+
+        Variable a_xor_b(input1.number_wires);
+        Variable a_and_b(input1.number_wires);
+        Variable a_xor_b_and_c(input1.number_wires);
+
+        for (int i = 0; i < output.number_wires; i++) {
+            _xor_gate( input1.wires[i], input2.wires[i], a_xor_b.wires[i] );
+            _xor_gate( a_xor_b.wires[i], c_var.wires[i], output.wires[i] );
+            if (i != output.number_wires - 1) {
+                _and_gate( input1.wires[i], input2.wires[i], a_and_b.wires[i] );
+                _and_gate( a_xor_b.wires[i], c_var.wires[i], a_xor_b_and_c.wires[i] );
+                _or_gate( a_and_b.wires[i], a_xor_b_and_c.wires[i], c_var.wires[i+1] );
+            }
+        }
+    } */
 
     void _xor_gate(const uint64_t& wire_in1, const uint64_t& wire_in2, uint64_t& wire_out) {
         _number_gates++;
