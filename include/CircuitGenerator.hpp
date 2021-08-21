@@ -10,7 +10,9 @@
 
 enum class CircuitType
 {
-    BRISTOL
+    BRISTOL,
+    BRISTOL_FASHION,
+    LIBSCAPI
 };
 
 class CircuitGenerator// : virtual public Circuit
@@ -56,16 +58,16 @@ public:
 
     ~CircuitGenerator() { printf("Closed.\n"); _circuit_file.close(); _temp_circuit_file.close(); }
 
-    template<typename DataType>
-    Variable create_constant(DataType value) {
-        Variable output(8 * sizeof(DataType));
+    // template<typename DataType>
+    // Variable create_constant(DataType value) {
+    //     Variable output(8 * sizeof(DataType));
 
-        for(int i = 0; i < 8 * sizeof(DataType); i++) {
-            output.wires[i] = ((value >> i) & 0x01) == 0x00 ? zero_wire : one_wire;
-        }
+    //     for(int i = 0; i < 8 * sizeof(DataType); i++) {
+    //         output.wires[i] = ((value >> i) & 0x01) == 0x00 ? zero_wire : one_wire;
+    //     }
 
-        return output;
-    }
+    //     return output;
+    // }
 
     Variable create_constant(int n_bits, uint64_t value);
 
@@ -122,7 +124,7 @@ public:
                 printf("There are no more input wires left to be assigned.\n");
             }
 
-            input.wires[i].id = assigned_wires++;
+            input.wires[i].label = assigned_wires++;
         }
     }
 
@@ -161,9 +163,9 @@ public:
             _xor_gate( input1.wires[i], input2.wires[i], a_xor_b.wires[i] );
             //_xor_gate( a_xor_b.wires[i], c_var.wires[i], output.wires[i] ); // In next for
             if (i != output.number_wires - 1) {
-                _and_gate( input1.wires[i].id, input2.wires[i].id, a_and_b.wires[i].id );
-                _and_gate( a_xor_b.wires[i].id, c_var.wires[i].id, a_xor_b_and_c.wires[i].id );
-                _or_gate( a_and_b.wires[i].id, a_xor_b_and_c.wires[i].id, c_var.wires[i+1].id );
+                _and_gate( input1.wires[i].label, input2.wires[i].label, a_and_b.wires[i].label );
+                _and_gate( a_xor_b.wires[i].label, c_var.wires[i].label, a_xor_b_and_c.wires[i].label );
+                _or_gate( a_and_b.wires[i].label, a_xor_b_and_c.wires[i].label, c_var.wires[i+1].label );
             }
         }
 
@@ -228,11 +230,11 @@ public:
 
         std::string gate = "2 1 ";
 
-        gate += in1.id < in2.id ? std::to_string(in1.id) + " " + std::to_string(in2.id) : std::to_string(in2.id) + " " + std::to_string(in1.id);
+        gate += in1.label < in2.label ? std::to_string(in1.label) + " " + std::to_string(in2.label) : std::to_string(in2.label) + " " + std::to_string(in1.label);
 
-        out.id = _number_wires++;
+        out.label = _number_wires++;
 
-        gate += " " + std::to_string(out.id) + " XOR\n";
+        gate += " " + std::to_string(out.label) + " XOR\n";
 
         _temp_circuit_file.write(gate.c_str(), gate.size());
     }
@@ -258,11 +260,11 @@ public:
 
         std::string gate = "1 1 ";
 
-        gate += std::to_string(in.id);
+        gate += std::to_string(in.label);
 
-        out.id = _number_wires++;
+        out.label = _number_wires++;
 
-        gate += " " + std::to_string(out.id) + " INV\n";
+        gate += " " + std::to_string(out.label) + " INV\n";
 
         _temp_circuit_file.write(gate.c_str(), gate.size());
     }
@@ -288,11 +290,11 @@ public:
 
         std::string gate = "2 1 ";
 
-        gate += in1.id < in2.id ? std::to_string(in1.id) + " " + std::to_string(in2.id) : std::to_string(in2.id) + " " + std::to_string(in1.id);
+        gate += in1.label < in2.label ? std::to_string(in1.label) + " " + std::to_string(in2.label) : std::to_string(in2.label) + " " + std::to_string(in1.label);
 
-        out.id = _number_wires++;
+        out.label = _number_wires++;
 
-        gate += " " + std::to_string(out.id) + " AND\n";
+        gate += " " + std::to_string(out.label) + " AND\n";
 
         _temp_circuit_file.write(gate.c_str(), gate.size());
     }
@@ -318,11 +320,11 @@ public:
 
         std::string gate = "2 1 ";
 
-        gate += in1.id < in2.id ? std::to_string(in1.id) + " " + std::to_string(in2.id) : std::to_string(in2.id) + " " + std::to_string(in1.id);
+        gate += in1.label < in2.label ? std::to_string(in1.label) + " " + std::to_string(in2.label) : std::to_string(in2.label) + " " + std::to_string(in1.label);
 
-        out.id = _number_wires++;
+        out.label = _number_wires++;
 
-        gate += " " + std::to_string(out.id) + " OR\n";
+        gate += " " + std::to_string(out.label) + " OR\n";
 
         _temp_circuit_file.write(gate.c_str(), gate.size());
     }

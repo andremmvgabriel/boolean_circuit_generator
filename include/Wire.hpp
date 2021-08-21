@@ -5,6 +5,6 @@
 class Wire
 {
 public:
-    uint64_t id = 0;
+    uint64_t label = 0;
     uint8_t value = 0;
 };

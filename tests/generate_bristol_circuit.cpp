@@ -19,7 +19,7 @@ int main() {
 
     circuit_generator.start();
 
-    Variable test = circuit_generator.create_constant<uint8_t>(0xF0);
+    Variable test = circuit_generator.create_constant(8, 0xF0);
 
     /* circuit_generator.XOR(output, test, test);
     circuit_generator.INV(test, test);
