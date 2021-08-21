@@ -122,7 +122,7 @@ public:
                 printf("There are no more input wires left to be assigned.\n");
             }
 
-            input.wires[i] = assigned_wires++;
+            input.wires[i].id = assigned_wires++;
         }
     }
 
@@ -130,7 +130,7 @@ public:
     }
 
     /*
-    Truth table:
+    > Truth table:
 
     A   B   Cin |   O   Cout
     ------------------------
@@ -142,6 +142,11 @@ public:
     1   0   1   |   0   1
     1   1   0   |   0   1
     1   1   1   |   1   1
+
+
+    > Karnaugh maps:
+
+    O (A, B, Cin)    
     */
     void addition(Variable& input1, Variable& input2, Variable& output) {
         printf("> Addition...\n");
@@ -156,9 +161,9 @@ public:
             _xor_gate( input1.wires[i], input2.wires[i], a_xor_b.wires[i] );
             _xor_gate( a_xor_b.wires[i], c_var.wires[i], output.wires[i] );
             if (i != output.number_wires - 1) {
-                _and_gate( input1.wires[i], input2.wires[i], a_and_b.wires[i] );
-                _and_gate( a_xor_b.wires[i], c_var.wires[i], a_xor_b_and_c.wires[i] );
-                _or_gate( a_and_b.wires[i], a_xor_b_and_c.wires[i], c_var.wires[i+1] );
+                _and_gate( input1.wires[i].id, input2.wires[i].id, a_and_b.wires[i].id );
+                _and_gate( a_xor_b.wires[i].id, c_var.wires[i].id, a_xor_b_and_c.wires[i].id );
+                _or_gate( a_and_b.wires[i].id, a_xor_b_and_c.wires[i].id, c_var.wires[i+1].id );
             }
         }
     }
@@ -178,23 +183,7 @@ public:
     1   1   1   |   1   1
     */
     void subtraction(Variable& input1, Variable& input2, Variable& output) {
-        printf("> Addition...\n");
-
-        Variable c_var = create_constant<uint64_t>(0x00);
-
-        Variable a_xor_b(input1.number_wires);
-        Variable a_and_b(input1.number_wires);
-        Variable a_xor_b_and_c(input1.number_wires);
-
-        for (int i = 0; i < output.number_wires; i++) {
-            _xor_gate( input1.wires[i], input2.wires[i], a_xor_b.wires[i] );
-            _xor_gate( a_xor_b.wires[i], c_var.wires[i], output.wires[i] );
-            if (i != output.number_wires - 1) {
-                _and_gate( input1.wires[i], input2.wires[i], a_and_b.wires[i] );
-                _and_gate( a_xor_b.wires[i], c_var.wires[i], a_xor_b_and_c.wires[i] );
-                _or_gate( a_and_b.wires[i], a_xor_b_and_c.wires[i], c_var.wires[i+1] );
-            }
-        }
+        printf("> Subtraction...\n");
     }
 
     void _xor_gate(const uint64_t& wire_in1, const uint64_t& wire_in2, uint64_t& wire_out) {
@@ -208,6 +197,21 @@ public:
         wire_out = _number_wires++;
 
         gate += " " + std::to_string(wire_out) + " XOR\n";
+
+        _temp_circuit_file.write(gate.c_str(), gate.size());
+    }
+
+    void _xor_gate(const Wire& in1, const Wire& in2, Wire& out) {
+        _number_gates++;
+        _counter_xor_gates++;
+
+        std::string gate = "2 1 ";
+
+        gate += in1.id < in2.id ? std::to_string(in1.id) + " " + std::to_string(in2.id) : std::to_string(in2.id) + " " + std::to_string(in1.id);
+
+        out.id = _number_wires++;
+
+        gate += " " + std::to_string(out.id) + " XOR\n";
 
         _temp_circuit_file.write(gate.c_str(), gate.size());
     }
@@ -227,6 +231,21 @@ public:
         _temp_circuit_file.write(gate.c_str(), gate.size());
     }
 
+    void _inv_gate(const Wire& in, Wire& out) {
+        _number_gates++;
+        _counter_inv_gates++;
+
+        std::string gate = "1 1 ";
+
+        gate += std::to_string(in.id);
+
+        out.id = _number_wires++;
+
+        gate += " " + std::to_string(out.id) + " INV\n";
+
+        _temp_circuit_file.write(gate.c_str(), gate.size());
+    }
+
     void _and_gate(const uint64_t& wire_in1, const uint64_t& wire_in2, uint64_t& wire_out) {
         _number_gates++;
         _counter_and_gates++;
@@ -242,6 +261,21 @@ public:
         _temp_circuit_file.write(gate.c_str(), gate.size());
     }
 
+    void _and_gate(const Wire& in1, const Wire& in2, Wire& out) {
+        _number_gates++;
+        _counter_and_gates++;
+
+        std::string gate = "2 1 ";
+
+        gate += in1.id < in2.id ? std::to_string(in1.id) + " " + std::to_string(in2.id) : std::to_string(in2.id) + " " + std::to_string(in1.id);
+
+        out.id = _number_wires++;
+
+        gate += " " + std::to_string(out.id) + " AND\n";
+
+        _temp_circuit_file.write(gate.c_str(), gate.size());
+    }
+
     void _or_gate(const uint64_t& wire_in1, const uint64_t& wire_in2, uint64_t& wire_out) {
         _number_gates++;
         _counter_or_gates++;
@@ -253,6 +287,21 @@ public:
         wire_out = _number_wires++;
 
         gate += " " + std::to_string(wire_out) + " OR\n";
+
+        _temp_circuit_file.write(gate.c_str(), gate.size());
+    }
+
+    void _or_gate(const Wire& in1, const Wire& in2, Wire& out) {
+        _number_gates++;
+        _counter_or_gates++;
+
+        std::string gate = "2 1 ";
+
+        gate += in1.id < in2.id ? std::to_string(in1.id) + " " + std::to_string(in2.id) : std::to_string(in2.id) + " " + std::to_string(in1.id);
+
+        out.id = _number_wires++;
+
+        gate += " " + std::to_string(out.id) + " OR\n";
 
         _temp_circuit_file.write(gate.c_str(), gate.size());
     }
