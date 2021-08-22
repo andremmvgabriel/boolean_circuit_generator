@@ -87,11 +87,35 @@ void test_equal() {
     circuit_generator.conclude();
 }
 
+void test_multiplexer() {
+    CircuitGenerator circuit_generator(
+        CircuitType::BRISTOL,
+        {1, 8, 8},
+        {8}
+    );
+
+    Variable control(1);
+    Variable input1(8);
+    Variable input2(8);
+    Variable output(8);
+
+    circuit_generator.add_input(control);
+    circuit_generator.add_input(input1);
+    circuit_generator.add_input(input2);
+
+    circuit_generator.start();
+
+    circuit_generator.multiplexer( control, input1, input2, output );
+
+    circuit_generator.conclude();
+}
+
 int main() {
     //test_addition();
     //test_subtraction();
     //test_multiplication();
-    test_equal();
+    //test_equal();
+    test_multiplexer();
 
     return 0;
 }
