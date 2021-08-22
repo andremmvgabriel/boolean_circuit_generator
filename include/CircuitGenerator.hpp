@@ -265,6 +265,24 @@ public:
         _inv_gate(output.wires[0], output.wires[0]);
     }
 
+    void multiplexer(Variable& control, Variable& input1, Variable& input2, Variable& output) {
+        Variable not_control(control.number_wires);
+
+        _inv_gate(control.wires[0], not_control.wires[0]);
+
+        Variable and_in1(input1.number_wires);
+        Variable and_in2(input2.number_wires);
+
+        for (int i = 0; i < input1.number_wires; i++) {
+            _and_gate( not_control.wires[0], input1.wires[i], and_in1.wires[i] );
+            _and_gate( control.wires[0], input2.wires[i], and_in2.wires[i] );
+        }
+
+        for (int i = 0; i < output.number_wires; i++) {
+            _or_gate( and_in1.wires[i], and_in2.wires[i], output.wires[i] );
+        }
+    }
+
     void _xor_gate(const uint64_t& wire_in1, const uint64_t& wire_in2, uint64_t& wire_out) {
         _number_gates++;
         _counter_xor_gates++;
