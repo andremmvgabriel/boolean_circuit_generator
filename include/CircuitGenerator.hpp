@@ -218,6 +218,31 @@ public:
         }
     }
 
+    void multiplication(Variable& input1, Variable& input2, Variable& output) {
+        output = Variable(input1.number_wires + input2.number_wires);
+
+        std::vector<Variable> vars (input2.number_wires);
+
+        // Creation of the multiple variables
+        for (int i = 0; i < vars.size(); i++) {
+            vars.at(i) = create_constant(input1.number_wires + input2.number_wires, 0x00);
+
+            for (int j = 0; j < input1.number_wires; j++) {
+                _and_gate( input1.wires[j], input2.wires[i], vars.at(i).wires[i+j] );
+            }
+        }
+
+        // 
+        for (int i = 0; i < vars.size() - 1 ; i++) {
+            if (i == 0) {
+                addition( vars.at(i), vars.at(i+1), output );
+            }
+            else {
+                addition( output, vars.at(i+1), output );
+            }
+        }
+    }
+
     void _xor_gate(const uint64_t& wire_in1, const uint64_t& wire_in2, uint64_t& wire_out) {
         _number_gates++;
         _counter_xor_gates++;
