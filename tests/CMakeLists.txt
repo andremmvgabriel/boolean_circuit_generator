@@ -4,3 +4,7 @@ add_executable( BristolCircuit
 target_link_libraries( BristolCircuit
     BooleanCircuitGenerator
 )
+
+add_executable( CircuitTest
+    test_bristol_circuit.cpp
+)
