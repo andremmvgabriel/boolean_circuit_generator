@@ -243,6 +243,28 @@ public:
         }
     }
 
+    void division() {}
+
+    void equal(Variable& input1, Variable& input2, Variable& output) {
+        // Safety check
+
+        Variable xor_outputs(input1.number_wires);
+
+        for (int i = 0; i < input1.number_wires; i++) {
+            _xor_gate(input1.wires[i], input2.wires[i], xor_outputs.wires[i]);
+        }
+
+        for (int i = 0; i < xor_outputs.number_wires - 1; i++) {
+            if (i == 0) {
+                _or_gate(xor_outputs.wires[i], xor_outputs.wires[i+1], output.wires[0]);
+            } else {
+                _or_gate(xor_outputs.wires[i+1], output.wires[0], output.wires[0]);
+            }
+        }
+
+        _inv_gate(output.wires[0], output.wires[0]);
+    }
+
     void _xor_gate(const uint64_t& wire_in1, const uint64_t& wire_in2, uint64_t& wire_out) {
         _number_gates++;
         _counter_xor_gates++;
