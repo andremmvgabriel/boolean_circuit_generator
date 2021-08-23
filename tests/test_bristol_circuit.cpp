@@ -72,21 +72,29 @@ public:
             printf("      - Party %d number wires: %d\n", i, outputs_wires.at(i));
         }
 
+        int assigned = 0;
         for (int i = 0; i < input_wires.size(); i++) {
             for (int j = 0; j < input_wires.at(i); j++) {
                 std::getline(inputs_file, line);
-                wires_values[i == 0 ? j : j + i * input_wires.at(i-1)] = (uint8_t)(std::stoi(line));
+                wires_values[assigned + j] = (uint8_t)(std::stoi(line));
             }
+
+            assigned += input_wires.at(i);
         }
 
         printf("\n");
 
+        assigned = 0;
         for (int i = 0; i < input_wires.size(); i++) {
             printf("> Party %d wires values: ", i);
             for (int j = 0; j < input_wires.at(i); j++) {
-                //printf("%d ", wires_values.at(i == 0 ? j : j + i * input_wires.at(i-1)));
-                printf("%d ", wires_values.at(i == 0 ? j : j + i * input_wires.at(i-1)));
+                printf("%d ", wires_values.at(assigned + j));
             } printf("\n");
+            assigned += input_wires.at(i);
+        }
+
+        for (auto & vals : wires_values) {
+            printf("> Pair: %ld - %d\n", vals.first, vals.second);
         }
 
         // Performing the circuit (ON THE LOOP)
