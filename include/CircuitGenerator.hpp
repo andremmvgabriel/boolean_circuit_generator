@@ -283,7 +283,52 @@ public:
         }
     }
 
-    void comparator(Variable& input1, Variable& input2, Variable& output_smaller, Variable& output_equal, Variable& output_greater) {}
+    void comparator(Variable& input1, Variable& input2, Variable& output_smaller, Variable& output_equal, Variable& output_greater) {
+        Variable not_input1(input1.number_wires);
+        Variable not_input2(input2.number_wires);
+
+        Variable xnors(input1.number_wires);
+
+        // Prepares the ground base
+        for (int i = 0; i < input1.number_wires; i++) {
+            _inv_gate(input1.wires[i], not_input1.wires[i]);
+            _inv_gate(input2.wires[i], not_input2.wires[i]);
+
+            if (i != 0) {
+                _xor_gate(input1.wires[i], input2.wires[i], xnors.wires[i]);
+                _inv_gate(xnors.wires[i], xnors.wires[i]);
+            }
+        }
+
+        Variable middle_greater(input1.number_wires);
+        Variable middle_smaller(input2.number_wires);
+
+        for (int i = 0; i < middle_greater.number_wires; i++) {
+            for (int j = i; j < middle_greater.number_wires; j++) {
+                if (i == j) {
+                    _and_gate(input1.wires[j], not_input2.wires[j], middle_greater.wires[i]);
+                    _and_gate(not_input1.wires[j], input2.wires[j], middle_smaller.wires[i]);
+                }
+                else {
+                    _and_gate(middle_greater.wires[i], xnors.wires[j], middle_greater.wires[i]);
+                    _and_gate(middle_smaller.wires[i], xnors.wires[j], middle_smaller.wires[i]);
+                }
+            }
+        }
+
+        for (int i = 1; i < middle_greater.number_wires; i++) {
+            if (i == 1) {
+                _or_gate( middle_greater.wires[i - 1], middle_greater.wires[i], output_greater.wires[0] );
+                _or_gate( middle_smaller.wires[i - 1], middle_smaller.wires[i], output_smaller.wires[0] );
+            }
+            else {
+                _or_gate( middle_greater.wires[i], output_greater.wires[0], output_greater.wires[0] );
+                _or_gate( middle_smaller.wires[i], output_smaller.wires[0], output_smaller.wires[0] );
+            }
+        }
+
+        _or_gate(output_greater.wires[0], output_greater.wires[0], output_equal.wires[0]);
+    }
 
     void greater(Variable& input1, Variable& input2, Variable& output) {
         // Safety check
