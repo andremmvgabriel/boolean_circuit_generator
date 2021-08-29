@@ -110,12 +110,34 @@ void test_multiplexer() {
     circuit_generator.conclude();
 }
 
+void test_greater() {
+    CircuitGenerator circuit_generator(
+        CircuitType::BRISTOL,
+        {4, 4},
+        {1}
+    );
+
+    Variable input1(4);
+    Variable input2(4);
+    Variable output(1);
+
+    circuit_generator.add_input(input1);
+    circuit_generator.add_input(input2);
+
+    circuit_generator.start();
+
+    circuit_generator.greater( input1, input2, output );
+
+    circuit_generator.conclude();
+}
+
 int main() {
     //test_addition();
     //test_subtraction();
     //test_multiplication();
     //test_equal();
-    test_multiplexer();
+    //test_multiplexer();
+    test_greater();
 
     return 0;
 }

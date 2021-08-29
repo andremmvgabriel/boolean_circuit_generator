@@ -283,6 +283,53 @@ public:
         }
     }
 
+    void comparator(Variable& input1, Variable& input2, Variable& output_smaller, Variable& output_equal, Variable& output_greater) {}
+
+    void greater(Variable& input1, Variable& input2, Variable& output) {
+        // Safety check
+
+
+        Variable not_input2(input2.number_wires);
+        Variable xnors(input1.number_wires);
+
+        // Prepares the ground base
+        for (int i = 0; i < input1.number_wires; i++) {
+            _inv_gate(input2.wires[i], not_input2.wires[i]);
+
+            if (i != 0) {
+                _xor_gate(input1.wires[i], input2.wires[i], xnors.wires[i]);
+                _inv_gate(xnors.wires[i], xnors.wires[i]);
+            }
+        }
+
+        Variable middle(input1.number_wires);
+        for (int i = 0; i < middle.number_wires; i++) {
+            for (int j = i; j < middle.number_wires; j++) {
+                if (i == j) {
+                    _and_gate(input1.wires[j], not_input2.wires[j], middle.wires[i]);
+                }
+                else {
+                    _and_gate(middle.wires[i], xnors.wires[j], middle.wires[i]);
+                }
+            }
+        }
+
+        for (int i = 1; i < middle.number_wires; i++) {
+            if (i == 1) {
+                _or_gate( middle.wires[i - 1], middle.wires[i], output.wires[0] );
+            }
+            else {
+                _or_gate( middle.wires[i], output.wires[0], output.wires[0] );
+            }
+        }
+    }
+
+    void smaller() {}
+
+    void greater_or_equal() {}
+
+    void smaller_or_equal() {}
+
     void _xor_gate(const uint64_t& wire_in1, const uint64_t& wire_in2, uint64_t& wire_out) {
         _number_gates++;
         _counter_xor_gates++;
