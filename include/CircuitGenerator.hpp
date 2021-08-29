@@ -363,9 +363,14 @@ public:
         }
     }
 
-    void greater_or_equal() {}
+    void greater_or_equal(Variable& input1, Variable& input2, Variable& output) {
+        smaller(input1, input2, output);
+        _inv_gate(output.wires[0], output.wires[0]);
+    }
 
-    void smaller_or_equal() {}
+    void smaller_or_equal(Variable& input1, Variable& input2, Variable& output) {
+        
+    }
 
     void _xor_gate(const uint64_t& wire_in1, const uint64_t& wire_in2, uint64_t& wire_out) {
         _number_gates++;

@@ -152,6 +152,27 @@ void test_smaller() {
     circuit_generator.conclude();
 }
 
+void test_greater_or_equal() {
+    CircuitGenerator circuit_generator(
+        CircuitType::BRISTOL,
+        {4, 4},
+        {1}
+    );
+
+    Variable input1(4);
+    Variable input2(4);
+    Variable output(1);
+
+    circuit_generator.add_input(input1);
+    circuit_generator.add_input(input2);
+
+    circuit_generator.start();
+
+    circuit_generator.greater_or_equal( input1, input2, output );
+
+    circuit_generator.conclude();
+}
+
 int main() {
     //test_addition();
     //test_subtraction();
@@ -159,7 +180,8 @@ int main() {
     //test_equal();
     //test_multiplexer();
     //test_greater();
-    test_smaller();
+    //test_smaller();
+    test_greater_or_equal();
 
     return 0;
 }
