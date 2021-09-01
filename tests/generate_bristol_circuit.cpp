@@ -194,6 +194,29 @@ void test_smaller_or_equal() {
     circuit_generator.conclude();
 }
 
+void test_libscapi() {
+    CircuitGenerator circuit_generator(
+        CircuitType::LIBSCAPI,
+        {4, 4},
+        {4}
+    );
+
+    Variable input1(4);
+    Variable input2(4);
+    Variable output(4);
+
+    circuit_generator.add_input(input1);
+    circuit_generator.add_input(input2);
+
+    circuit_generator.start();
+
+    circuit_generator.addition( input1, input2, output );
+
+    circuit_generator.conclude();
+
+    circuit_generator.add_output(output);
+}
+
 int main() {
     //test_addition();
     //test_subtraction();
@@ -203,7 +226,8 @@ int main() {
     //test_greater();
     //test_smaller();
     //test_greater_or_equal();
-    test_smaller_or_equal();
+    //test_smaller_or_equal();
+    test_libscapi();
 
     return 0;
 }
