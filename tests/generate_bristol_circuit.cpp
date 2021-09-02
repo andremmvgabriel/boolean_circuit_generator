@@ -196,7 +196,7 @@ void test_smaller_or_equal() {
 
 void test_libscapi() {
     CircuitGenerator circuit_generator(
-        CircuitType::LIBSCAPI,
+        CircuitType::BRISTOL,
         {4, 4},
         {4}
     );

@@ -189,10 +189,14 @@ public:
     }
 };
 
-int main(int argc, char* argv[]) {
-    CircuitTester circuit_tester;
+#include <BristolCircuitTester.hpp>
 
-    circuit_tester.run(argv[1], argv[2]);
+int main(int argc, char* argv[]) {
+    //CircuitTester circuit_tester;
+    //circuit_tester.run(argv[1], argv[2]);
+
+    gabe::circuits::test::BristolTester bristol_tester(argv[1]);
+    //bristol_tester.run(argv[2]);
 
     return 0;
 }
