@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <unordered_map>
 
 /* enum class CircuitType
 {
@@ -47,10 +48,15 @@ namespace gabe
             class TesterAbs
             {
             protected:
+                // Core variables
                 std::ifstream _circuit_file;
 
                 // Circuit specs
                 uint64_t _number_gates = 0;
+                std::unordered_map<uint64_t, uint8_t> _wire_values;
+
+                // Control Variables
+                uint64_t _circuit_start = 0;
 
             protected:
                 TesterAbs();
@@ -59,7 +65,11 @@ namespace gabe
                 virtual ~TesterAbs();
 
                 virtual void read_header();
-                virtual void run(const std::string& inputs);
+                virtual void read_inputs(const std::string& inputs);
+                virtual void execute_circuit();
+            
+            public:
+                void run(const std::string& inputs);
             };
         }
     }
