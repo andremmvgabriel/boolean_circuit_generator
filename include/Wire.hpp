@@ -2,9 +2,15 @@
 
 #include <stdint.h>
 
-class Wire
+namespace gabe
 {
-public:
-    uint64_t label = 0;
-    uint8_t value = 0;
-};
+    namespace circuits
+    {
+        class Wire
+        {
+        public:
+            uint64_t label = 0x00;
+            uint8_t value = 0x00;
+        };
+    }
+}

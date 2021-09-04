@@ -5,15 +5,21 @@
 
 #include <Wire.hpp>
 
-class Variable
+namespace gabe
 {
-public:
-    std::vector<Wire> wires;
-    uint8_t number_wires = 0;
+    namespace circuits
+    {
+        class Variable
+        {
+        public:
+            std::vector<Wire> wires;
+            uint8_t number_wires;
+        
+        public:
+            Variable();
+            Variable(uint8_t n_bits);
 
-public:
-    Variable();
-    Variable(uint8_t n_bits);
-
-    virtual ~Variable();
-};
+            virtual ~Variable();
+        };
+    }
+}

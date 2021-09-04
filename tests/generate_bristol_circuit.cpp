@@ -10,9 +10,9 @@ void test_addition() {
         {8}
     );
 
-    Variable input1(8);
-    Variable input2(8);
-    Variable output(8);
+    gabe::circuits::Variable input1(8);
+    gabe::circuits::Variable input2(8);
+    gabe::circuits::Variable output(8);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -31,9 +31,9 @@ void test_subtraction() {
         {8}
     );
 
-    Variable input1(8);
-    Variable input2(8);
-    Variable output(8);
+    gabe::circuits::Variable input1(8);
+    gabe::circuits::Variable input2(8);
+    gabe::circuits::Variable output(8);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -52,9 +52,9 @@ void test_multiplication() {
         {8}
     );
 
-    Variable input1(4);
-    Variable input2(4);
-    Variable output(8);
+    gabe::circuits::Variable input1(4);
+    gabe::circuits::Variable input2(4);
+    gabe::circuits::Variable output(8);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -73,9 +73,9 @@ void test_equal() {
         {1}
     );
 
-    Variable input1(8);
-    Variable input2(8);
-    Variable output(1);
+    gabe::circuits::Variable input1(8);
+    gabe::circuits::Variable input2(8);
+    gabe::circuits::Variable output(1);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -94,10 +94,10 @@ void test_multiplexer() {
         {8}
     );
 
-    Variable control(1);
-    Variable input1(8);
-    Variable input2(8);
-    Variable output(8);
+    gabe::circuits::Variable control(1);
+    gabe::circuits::Variable input1(8);
+    gabe::circuits::Variable input2(8);
+    gabe::circuits::Variable output(8);
 
     circuit_generator.add_input(control);
     circuit_generator.add_input(input1);
@@ -117,9 +117,9 @@ void test_greater() {
         {1}
     );
 
-    Variable input1(4);
-    Variable input2(4);
-    Variable output(1);
+    gabe::circuits::Variable input1(4);
+    gabe::circuits::Variable input2(4);
+    gabe::circuits::Variable output(1);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -138,9 +138,9 @@ void test_smaller() {
         {1}
     );
 
-    Variable input1(4);
-    Variable input2(4);
-    Variable output(1);
+    gabe::circuits::Variable input1(4);
+    gabe::circuits::Variable input2(4);
+    gabe::circuits::Variable output(1);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -159,9 +159,9 @@ void test_greater_or_equal() {
         {1}
     );
 
-    Variable input1(4);
-    Variable input2(4);
-    Variable output(1);
+    gabe::circuits::Variable input1(4);
+    gabe::circuits::Variable input2(4);
+    gabe::circuits::Variable output(1);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -180,9 +180,9 @@ void test_smaller_or_equal() {
         {1}
     );
 
-    Variable input1(4);
-    Variable input2(4);
-    Variable output(1);
+    gabe::circuits::Variable input1(4);
+    gabe::circuits::Variable input2(4);
+    gabe::circuits::Variable output(1);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -201,9 +201,9 @@ void test_libscapi() {
         {4}
     );
 
-    Variable input1(4);
-    Variable input2(4);
-    Variable output(4);
+    gabe::circuits::Variable input1(4);
+    gabe::circuits::Variable input2(4);
+    gabe::circuits::Variable output(4);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -217,6 +217,8 @@ void test_libscapi() {
     circuit_generator.add_output(output);
 }
 
+#include <BristolCircuitGenerator.hpp>
+
 int main() {
     //test_addition();
     //test_subtraction();
@@ -228,6 +230,17 @@ int main() {
     //test_greater_or_equal();
     //test_smaller_or_equal();
     test_libscapi();
+
+    gabe::circuits::generator::BristolGenerator test(
+        "BristolCircuit",
+        { 4, 4 }, // Number wires in each input party
+        { 4 } // Number wires in each output party
+    );
+    gabe::circuits::Wire wire1; wire1.label=1;
+    gabe::circuits::Wire wire2; wire2.label=2;
+    gabe::circuits::Wire wire3;
+    test._xor_gate(wire1, wire2, wire3);
+    test._inv_gate(wire1, wire3);
 
     return 0;
 }

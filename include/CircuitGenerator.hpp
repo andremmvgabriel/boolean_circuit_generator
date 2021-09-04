@@ -49,8 +49,8 @@ private:
     uint64_t _expected_output_wires = 0x00;
 
     // Zero and One wires
-    Wire _zero;
-    Wire _one;
+    gabe::circuits::Wire _zero;
+    gabe::circuits::Wire _one;
 
 
 private:
@@ -59,10 +59,10 @@ private:
     void _write_2_1_gate();
     void _write_1_1_gate();
 
-    void _xor_gate(const Wire& in1, const Wire& in2, Wire& out);
-    void _inv_gate(const Wire& in, Wire& out);
-    void _and_gate(const Wire& in1, const Wire& in2, Wire& out);
-    void _or_gate(const Wire& in1, const Wire& in2, Wire& out);
+    void _xor_gate(const gabe::circuits::Wire& in1, const gabe::circuits::Wire& in2, gabe::circuits::Wire& out);
+    void _inv_gate(const gabe::circuits::Wire& in, gabe::circuits::Wire& out);
+    void _and_gate(const gabe::circuits::Wire& in1, const gabe::circuits::Wire& in2, gabe::circuits::Wire& out);
+    void _or_gate(const gabe::circuits::Wire& in1, const gabe::circuits::Wire& in2, gabe::circuits::Wire& out);
 
 public:
     CircuitGenerator(CircuitType circuit_type, const std::vector<int> &input_parties_wires, const std::vector<int> &output_parties_wires);
@@ -80,12 +80,12 @@ public:
     //     return output;
     // }
 
-    Variable create_constant(int n_bits, uint64_t value);
+    gabe::circuits::Variable create_constant(int n_bits, uint64_t value);
 
     void start() {
         printf("> Writting...\n");
 
-        _xor_gate( Wire(), Wire(), _zero );
+        _xor_gate( gabe::circuits::Wire(), gabe::circuits::Wire(), _zero );
         _inv_gate( _zero, _one );
 
         printf("Zero wire: %lld\n", _zero.label);
@@ -94,9 +94,9 @@ public:
 
     void conclude();
 
-    void add_input(Variable &input);
+    void add_input(gabe::circuits::Variable &input);
 
-    void add_output(Variable &output) {
+    void add_output(gabe::circuits::Variable &output) {
     }
 
     /*
@@ -118,14 +118,14 @@ public:
 
     O (A, B, Cin)    
     */
-    void addition(Variable& input1, Variable& input2, Variable& output) {
+    void addition(gabe::circuits::Variable& input1, gabe::circuits::Variable& input2, gabe::circuits::Variable& output) {
         printf("> Addition...\n");
 
-        Variable c_var = create_constant(input1.number_wires, 0x00);
+        gabe::circuits::Variable c_var = create_constant(input1.number_wires, 0x00);
 
-        Variable a_xor_b(input1.number_wires);
-        Variable a_and_b(input1.number_wires);
-        Variable a_xor_b_and_c(input1.number_wires);
+        gabe::circuits::Variable a_xor_b(input1.number_wires);
+        gabe::circuits::Variable a_and_b(input1.number_wires);
+        gabe::circuits::Variable a_xor_b_and_c(input1.number_wires);
 
         for (int i = 0; i < output.number_wires; i++) {
             _xor_gate( input1.wires[i], input2.wires[i], a_xor_b.wires[i] );
@@ -157,17 +157,17 @@ public:
     1   1   0   |   0   0
     1   1   1   |   1   1
     */
-    void subtraction(Variable& input1, Variable& input2, Variable& output) {
+    void subtraction(gabe::circuits::Variable& input1, gabe::circuits::Variable& input2, gabe::circuits::Variable& output) {
         printf("> Subtraction...\n");
 
-        Variable c_io = create_constant(output.number_wires, 0x00);
+        gabe::circuits::Variable c_io = create_constant(output.number_wires, 0x00);
 
         //Wire wire1, wire2, wire3, wire4, wire5;
-        Variable a_xor_b(output.number_wires);
-        Variable inv_xor(output.number_wires);
-        Variable inv_a(output.number_wires);
-        Variable and_xor(output.number_wires);
-        Variable and_a_c(output.number_wires);
+        gabe::circuits::Variable a_xor_b(output.number_wires);
+        gabe::circuits::Variable inv_xor(output.number_wires);
+        gabe::circuits::Variable inv_a(output.number_wires);
+        gabe::circuits::Variable and_xor(output.number_wires);
+        gabe::circuits::Variable and_a_c(output.number_wires);
 
         for (int i = 0; i < output.number_wires; i++) {
             _xor_gate( input1.wires[i], input2.wires[i], a_xor_b.wires[i] );
@@ -186,10 +186,10 @@ public:
         }
     }
 
-    void multiplication(Variable& input1, Variable& input2, Variable& output) {
-        output = Variable(input1.number_wires + input2.number_wires);
+    void multiplication(gabe::circuits::Variable& input1, gabe::circuits::Variable& input2, gabe::circuits::Variable& output) {
+        output = gabe::circuits::Variable(input1.number_wires + input2.number_wires);
 
-        std::vector<Variable> vars (input2.number_wires);
+        std::vector<gabe::circuits::Variable> vars (input2.number_wires);
 
         // Creation of the multiple variables
         for (int i = 0; i < vars.size(); i++) {
@@ -213,10 +213,10 @@ public:
 
     void division() {}
 
-    void equal(Variable& input1, Variable& input2, Variable& output) {
+    void equal(gabe::circuits::Variable& input1, gabe::circuits::Variable& input2, gabe::circuits::Variable& output) {
         // Safety check
 
-        Variable xor_outputs(input1.number_wires);
+        gabe::circuits::Variable xor_outputs(input1.number_wires);
 
         for (int i = 0; i < input1.number_wires; i++) {
             _xor_gate(input1.wires[i], input2.wires[i], xor_outputs.wires[i]);
@@ -233,13 +233,13 @@ public:
         _inv_gate(output.wires[0], output.wires[0]);
     }
 
-    void multiplexer(Variable& control, Variable& input1, Variable& input2, Variable& output) {
-        Variable not_control(control.number_wires);
+    void multiplexer(gabe::circuits::Variable& control, gabe::circuits::Variable& input1, gabe::circuits::Variable& input2, gabe::circuits::Variable& output) {
+        gabe::circuits::Variable not_control(control.number_wires);
 
         _inv_gate(control.wires[0], not_control.wires[0]);
 
-        Variable and_in1(input1.number_wires);
-        Variable and_in2(input2.number_wires);
+        gabe::circuits::Variable and_in1(input1.number_wires);
+        gabe::circuits::Variable and_in2(input2.number_wires);
 
         for (int i = 0; i < input1.number_wires; i++) {
             _and_gate( not_control.wires[0], input1.wires[i], and_in1.wires[i] );
@@ -251,11 +251,11 @@ public:
         }
     }
 
-    void comparator(Variable& input1, Variable& input2, Variable& output_smaller, Variable& output_equal, Variable& output_greater) {
-        Variable not_input1(input1.number_wires);
-        Variable not_input2(input2.number_wires);
+    void comparator(gabe::circuits::Variable& input1, gabe::circuits::Variable& input2, gabe::circuits::Variable& output_smaller, gabe::circuits::Variable& output_equal, gabe::circuits::Variable& output_greater) {
+        gabe::circuits::Variable not_input1(input1.number_wires);
+        gabe::circuits::Variable not_input2(input2.number_wires);
 
-        Variable xnors(input1.number_wires);
+        gabe::circuits::Variable xnors(input1.number_wires);
 
         // Prepares the ground base
         for (int i = 0; i < input1.number_wires; i++) {
@@ -268,8 +268,8 @@ public:
             }
         }
 
-        Variable middle_greater(input1.number_wires);
-        Variable middle_smaller(input2.number_wires);
+        gabe::circuits::Variable middle_greater(input1.number_wires);
+        gabe::circuits::Variable middle_smaller(input2.number_wires);
 
         for (int i = 0; i < middle_greater.number_wires; i++) {
             for (int j = i; j < middle_greater.number_wires; j++) {
@@ -298,12 +298,12 @@ public:
         _or_gate(output_greater.wires[0], output_greater.wires[0], output_equal.wires[0]);
     }
 
-    void greater(Variable& input1, Variable& input2, Variable& output) {
+    void greater(gabe::circuits::Variable& input1, gabe::circuits::Variable& input2, gabe::circuits::Variable& output) {
         // Safety check
 
 
-        Variable not_input2(input2.number_wires);
-        Variable xnors(input1.number_wires);
+        gabe::circuits::Variable not_input2(input2.number_wires);
+        gabe::circuits::Variable xnors(input1.number_wires);
 
         // Prepares the ground base
         for (int i = 0; i < input1.number_wires; i++) {
@@ -315,7 +315,7 @@ public:
             }
         }
 
-        Variable middle(input1.number_wires);
+        gabe::circuits::Variable middle(input1.number_wires);
         for (int i = 0; i < middle.number_wires; i++) {
             for (int j = i; j < middle.number_wires; j++) {
                 if (i == j) {
@@ -337,12 +337,12 @@ public:
         }
     }
 
-    void smaller(Variable& input1, Variable& input2, Variable& output) {
+    void smaller(gabe::circuits::Variable& input1, gabe::circuits::Variable& input2, gabe::circuits::Variable& output) {
         // Safety check
 
 
-        Variable not_input1(input1.number_wires);
-        Variable xnors(input1.number_wires);
+        gabe::circuits::Variable not_input1(input1.number_wires);
+        gabe::circuits::Variable xnors(input1.number_wires);
 
         // Prepares the ground base
         for (int i = 0; i < input1.number_wires; i++) {
@@ -354,7 +354,7 @@ public:
             }
         }
 
-        Variable middle(input1.number_wires);
+        gabe::circuits::Variable middle(input1.number_wires);
         for (int i = 0; i < middle.number_wires; i++) {
             for (int j = i; j < middle.number_wires; j++) {
                 if (i == j) {
@@ -376,17 +376,17 @@ public:
         }
     }
 
-    void greater_or_equal(Variable& input1, Variable& input2, Variable& output) {
+    void greater_or_equal(gabe::circuits::Variable& input1, gabe::circuits::Variable& input2, gabe::circuits::Variable& output) {
         smaller(input1, input2, output);
         _inv_gate(output.wires[0], output.wires[0]);
     }
 
-    void smaller_or_equal(Variable& input1, Variable& input2, Variable& output) {
+    void smaller_or_equal(gabe::circuits::Variable& input1, gabe::circuits::Variable& input2, gabe::circuits::Variable& output) {
         greater(input1, input2, output);
         _inv_gate(output.wires[0], output.wires[0]);
     }
 
-    void XOR(Variable& input1, Variable& input2, Variable& output) {
+    void XOR(gabe::circuits::Variable& input1, gabe::circuits::Variable& input2, gabe::circuits::Variable& output) {
         if (input1.number_wires != input2.number_wires && input1.number_wires != output.number_wires) {
             printf("The variables inputted do not share the same size.\n");
         }
@@ -396,7 +396,7 @@ public:
         }
     }
 
-    void INV(Variable& input, Variable& output) {
+    void INV(gabe::circuits::Variable& input, gabe::circuits::Variable& output) {
         if (input.number_wires != output.number_wires) {
             printf("The variables inputted do not share the same size.\n");
         }
@@ -406,7 +406,7 @@ public:
         }
     }
 
-    void AND(Variable& input1, Variable& input2, Variable& output) {
+    void AND(gabe::circuits::Variable& input1, gabe::circuits::Variable& input2, gabe::circuits::Variable& output) {
         if (input1.number_wires != input2.number_wires && input1.number_wires != output.number_wires) {
             printf("The variables inputted do not share the same size.\n");
         }
@@ -416,7 +416,7 @@ public:
         }
     }
 
-    void OR(Variable& input1, Variable& input2, Variable& output) {
+    void OR(gabe::circuits::Variable& input1, gabe::circuits::Variable& input2, gabe::circuits::Variable& output) {
         if (input1.number_wires != input2.number_wires && input1.number_wires != output.number_wires) {
             printf("The variables inputted do not share the same size.\n");
         }
@@ -426,3 +426,57 @@ public:
         }
     }
 };
+
+#include <unordered_map>
+#include <stdio.h>
+
+namespace gabe
+{
+    namespace circuits
+    {
+        namespace generator
+        {
+            class CircuitGenerator
+            {
+            protected:
+                // Files
+                std::ofstream _circuit_file;
+                std::fstream _temp_file;
+                std::string _temp_file_name;
+
+                // 
+                std::unordered_map<std::string, std::string> _gates_map;
+
+                // Zero and One wires
+                Wire _zero;
+                Wire _one;
+
+                // Circuit info
+                uint64_t _counter_gates = 0x00;
+                uint64_t _counter_wires = 0x00;
+
+                // Circuit printable control variables
+                uint64_t _counter_xor_gates = 0x00;
+                uint64_t _counter_and_gates = 0x00;
+                uint64_t _counter_inv_gates = 0x00;
+                uint64_t _counter_or_gates = 0x00;
+
+            protected:
+                CircuitGenerator();
+                CircuitGenerator(const std::string& circuit_file, const std::vector<uint64_t>& number_wires_input_parties, const std::vector<uint64_t>& number_wires_output_parties);
+
+                void _write_1_1_gate(const uint64_t in, const uint64_t out, const std::string& gate);
+                void _write_2_1_gate(const uint64_t in1, const uint64_t in2, const uint64_t out, const std::string& gate);
+
+            public:
+                void _xor_gate(const Wire& in1, const Wire& in2, Wire& out);
+                void _and_gate(const Wire& in1, const Wire& in2, Wire& out);
+                void _inv_gate(const Wire& in, Wire& out);
+                void _or_gate(const Wire& in1, const Wire& in2, Wire& out);
+            
+            public:
+                ~CircuitGenerator();
+            };
+        }
+    }
+}

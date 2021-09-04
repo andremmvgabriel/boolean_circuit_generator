@@ -22,9 +22,9 @@ CircuitGenerator::CircuitGenerator(CircuitType circuit_type, const std::vector<i
     for (auto & amount : output_parties_wires) { _expected_output_wires += amount; }
 }
 
-Variable CircuitGenerator::create_constant(int n_bits, uint64_t value) {
+gabe::circuits::Variable CircuitGenerator::create_constant(int n_bits, uint64_t value) {
     //
-    Variable variable (n_bits);
+    gabe::circuits::Variable variable (n_bits);
 
     for (int i = 0; i < n_bits; i++) {
         variable.wires[i].label = ((value >> i) & 0x01) == 0 ? _zero.label : _one.label;
@@ -34,7 +34,7 @@ Variable CircuitGenerator::create_constant(int n_bits, uint64_t value) {
     return variable;
 }
 
-void CircuitGenerator::add_input(Variable &input) {
+void CircuitGenerator::add_input(gabe::circuits::Variable &input) {
     // Goes through all the input wires
     for (int i = 0; i < input.number_wires; i++) {
         // Safety check in case the user got mistaken with the number of input wires
@@ -47,7 +47,7 @@ void CircuitGenerator::add_input(Variable &input) {
     }
 }
 
-void CircuitGenerator::_xor_gate(const Wire& in1, const Wire& in2, Wire& out) {
+void CircuitGenerator::_xor_gate(const gabe::circuits::Wire& in1, const gabe::circuits::Wire& in2, gabe::circuits::Wire& out) {
     // Increase the counters
     _number_gates++;
     _counter_xor_gates++;
@@ -71,7 +71,7 @@ void CircuitGenerator::_xor_gate(const Wire& in1, const Wire& in2, Wire& out) {
     _temp_circuit_file.write(gate.c_str(), gate.size());
 }
 
-void CircuitGenerator::_inv_gate(const Wire& in, Wire& out) {
+void CircuitGenerator::_inv_gate(const gabe::circuits::Wire& in, gabe::circuits::Wire& out) {
     // Increase the counters
     _number_gates++;
     _counter_inv_gates++;
@@ -95,7 +95,7 @@ void CircuitGenerator::_inv_gate(const Wire& in, Wire& out) {
     _temp_circuit_file.write(gate.c_str(), gate.size());
 }
 
-void CircuitGenerator::_and_gate(const Wire& in1, const Wire& in2, Wire& out) {
+void CircuitGenerator::_and_gate(const gabe::circuits::Wire& in1, const gabe::circuits::Wire& in2, gabe::circuits::Wire& out) {
     // Increase the counters
     _number_gates++;
     _counter_and_gates++;
@@ -118,7 +118,7 @@ void CircuitGenerator::_and_gate(const Wire& in1, const Wire& in2, Wire& out) {
     _temp_circuit_file.write(gate.c_str(), gate.size());
 }
 
-void CircuitGenerator::_or_gate(const Wire& in1, const Wire& in2, Wire& out) {
+void CircuitGenerator::_or_gate(const gabe::circuits::Wire& in1, const gabe::circuits::Wire& in2, gabe::circuits::Wire& out) {
     // Increase the counters
     _number_gates++;
     _counter_or_gates++;
@@ -232,4 +232,77 @@ void CircuitGenerator::conclude() {
         line += "\n";
         _circuit_file.write(line.c_str(), line.size());
     }
+}
+
+
+///////
+
+gabe::circuits::generator::CircuitGenerator::CircuitGenerator() {}
+
+gabe::circuits::generator::CircuitGenerator::CircuitGenerator(const std::string& circuit_file, const std::vector<uint64_t>& number_wires_input_parties, const std::vector<uint64_t>& number_wires_output_parties) {
+    // Saves the temp file name
+    _temp_file_name = "temp_" + circuit_file + ".txt";
+
+    // Opens the files
+    _circuit_file = std::ofstream( circuit_file + ".txt", std::ios::out );
+    _temp_file = std::fstream( _temp_file_name, std::ios::in | std::ios::out | std::ios::trunc );
+
+    // Registers the input wires
+}
+
+gabe::circuits::generator::CircuitGenerator::~CircuitGenerator() {
+    // Closes the files
+    if (_circuit_file.is_open()) { _circuit_file.close(); }
+    if (_temp_file.is_open()) { _temp_file.close(); }
+
+    // Removes the temporary file from the system
+    remove( _temp_file_name.c_str() );
+}
+
+void gabe::circuits::generator::CircuitGenerator::_xor_gate(const Wire& in1, const Wire& in2, Wire& out) {
+    // Increments the counters
+    _counter_gates++;
+    _counter_xor_gates++;
+
+    _write_2_1_gate( in1.label, in2.label, out.label = ++_counter_wires, "XOR" );
+}
+
+void gabe::circuits::generator::CircuitGenerator::_and_gate(const Wire& in1, const Wire& in2, Wire& out) {
+    // Increments the counters
+    _counter_gates++;
+    _counter_and_gates++;
+
+    _write_2_1_gate( in1.label, in2.label, out.label = ++_counter_wires, "AND" );
+}
+
+void gabe::circuits::generator::CircuitGenerator::_inv_gate(const Wire& in, Wire& out) {
+    // Increments the counters
+    _counter_gates++;
+    _counter_inv_gates++;
+
+    _write_1_1_gate( in.label, out.label = ++_counter_wires, "INV" );
+}
+
+void gabe::circuits::generator::CircuitGenerator::_or_gate(const Wire& in1, const Wire& in2, Wire& out) {
+    // Increments the counters
+    _counter_gates++;
+    _counter_or_gates++;
+
+    _write_2_1_gate( in1.label, in2.label, out.label = ++_counter_wires, "OR" );
+}
+
+void gabe::circuits::generator::CircuitGenerator::_write_1_1_gate(const uint64_t in, const uint64_t out, const std::string& gate) {
+    std::string line = "1 1 " + std::to_string(in) + " " + std::to_string(out) + " " + gate + "\n";
+
+    _temp_file.write( line.c_str(), line.size() );
+}
+
+void gabe::circuits::generator::CircuitGenerator::_write_2_1_gate(const uint64_t in1, const uint64_t in2, const uint64_t out, const std::string& gate) {
+    std::string input1 = in1 > in2 ? std::to_string(in2) : std::to_string(in1);
+
+    std::string input2 = in1 > in2 ? std::to_string(in1) : std::to_string(in2);
+
+    std::string line = "2 1 " + input1 + " " + input2 + " " + std::to_string(out) + " " + gate + "\n";
+
+    _temp_file.write( line.c_str(), line.size() );
 }

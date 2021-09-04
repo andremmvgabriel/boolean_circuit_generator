@@ -16,8 +16,9 @@ INCLUDE_DIRECTORIES ( include )
 set( src_generator_lib
     src/CircuitGenerator.cpp
     src/CircuitTester.cpp
-    src/LibscapiCircuitTester.cpp
+    src/BristolCircuitGenerator.cpp
     src/BristolCircuitTester.cpp
+    src/LibscapiCircuitTester.cpp
     src/Variable.cpp
 )
 add_library( BooleanCircuits STATIC ${src_generator_lib} )

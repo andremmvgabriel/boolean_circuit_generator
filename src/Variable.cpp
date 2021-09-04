@@ -1,9 +1,9 @@
 #include <Variable.hpp>
 
-Variable::Variable() {}
+gabe::circuits::Variable::Variable() {}
 
-Variable::Variable(uint8_t number_bits) : number_wires(number_bits) {
+gabe::circuits::Variable::Variable(uint8_t number_bits) : number_wires(number_bits) {
     wires.resize(number_bits);
 }
 
-Variable::~Variable() {}
+gabe::circuits::Variable::~Variable() {}
