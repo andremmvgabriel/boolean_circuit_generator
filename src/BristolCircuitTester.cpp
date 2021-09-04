@@ -43,9 +43,14 @@ void gabe::circuits::test::BristolTester::read_header() {
             // Gets the current pointer position
             uint64_t current_pos = _circuit_file.tellg();
 
+#ifdef _WIN32
+            // Returns the pointer back the whole string size
+            _circuit_file.seekg( current_pos - line.size() - 2 );
+#endif
+#ifdef linux
             // Returns the pointer back the whole string size
             _circuit_file.seekg( current_pos - line.size() - 1 );
-
+#endif
             // Registers the beginning position of the circuit
             _circuit_start = _circuit_file.tellg();
 

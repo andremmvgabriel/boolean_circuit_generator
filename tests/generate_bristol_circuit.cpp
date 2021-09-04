@@ -209,10 +209,10 @@ void test_multiplexer() {
 }
 
 void test_equal() {
-    CircuitGenerator circuit_generator(
-        CircuitType::BRISTOL,
-        {8, 8},
-        {1}
+    gabe::circuits::generator::BristolGenerator circuit_generator(
+        "BristolCircuit_equal.txt",
+        { 8, 8 },
+        { 1 }
     );
 
     gabe::circuits::Variable input1(8);
@@ -227,17 +227,19 @@ void test_equal() {
     circuit_generator.equal( input1, input2, output );
 
     circuit_generator.conclude();
+
+    circuit_generator.add_output(output);
 }
 
 void test_greater() {
-    CircuitGenerator circuit_generator(
-        CircuitType::BRISTOL,
-        {4, 4},
-        {1}
+    gabe::circuits::generator::BristolGenerator circuit_generator(
+        "BristolCircuit_greater.txt",
+        { 8, 8 },
+        { 1 }
     );
 
-    gabe::circuits::Variable input1(4);
-    gabe::circuits::Variable input2(4);
+    gabe::circuits::Variable input1(8);
+    gabe::circuits::Variable input2(8);
     gabe::circuits::Variable output(1);
 
     circuit_generator.add_input(input1);
@@ -248,17 +250,19 @@ void test_greater() {
     circuit_generator.greater( input1, input2, output );
 
     circuit_generator.conclude();
+
+    circuit_generator.add_output(output);
 }
 
 void test_smaller() {
-    CircuitGenerator circuit_generator(
-        CircuitType::BRISTOL,
-        {4, 4},
-        {1}
+    gabe::circuits::generator::BristolGenerator circuit_generator(
+        "BristolCircuit_smaller.txt",
+        { 8, 8 },
+        { 1 }
     );
 
-    gabe::circuits::Variable input1(4);
-    gabe::circuits::Variable input2(4);
+    gabe::circuits::Variable input1(8);
+    gabe::circuits::Variable input2(8);
     gabe::circuits::Variable output(1);
 
     circuit_generator.add_input(input1);
@@ -269,17 +273,19 @@ void test_smaller() {
     circuit_generator.smaller( input1, input2, output );
 
     circuit_generator.conclude();
+
+    circuit_generator.add_output(output);
 }
 
 void test_greater_or_equal() {
-    CircuitGenerator circuit_generator(
-        CircuitType::BRISTOL,
-        {4, 4},
-        {1}
+    gabe::circuits::generator::BristolGenerator circuit_generator(
+        "BristolCircuit_greater_or_equal.txt",
+        { 8, 8 },
+        { 1 }
     );
 
-    gabe::circuits::Variable input1(4);
-    gabe::circuits::Variable input2(4);
+    gabe::circuits::Variable input1(8);
+    gabe::circuits::Variable input2(8);
     gabe::circuits::Variable output(1);
 
     circuit_generator.add_input(input1);
@@ -290,17 +296,19 @@ void test_greater_or_equal() {
     circuit_generator.greater_or_equal( input1, input2, output );
 
     circuit_generator.conclude();
+
+    circuit_generator.add_output(output);
 }
 
 void test_smaller_or_equal() {
-    CircuitGenerator circuit_generator(
-        CircuitType::BRISTOL,
-        {4, 4},
-        {1}
+    gabe::circuits::generator::BristolGenerator circuit_generator(
+        "BristolCircuit_smaller_or_equal.txt",
+        { 8, 8 },
+        { 1 }
     );
 
-    gabe::circuits::Variable input1(4);
-    gabe::circuits::Variable input2(4);
+    gabe::circuits::Variable input1(8);
+    gabe::circuits::Variable input2(8);
     gabe::circuits::Variable output(1);
 
     circuit_generator.add_input(input1);
@@ -311,29 +319,35 @@ void test_smaller_or_equal() {
     circuit_generator.smaller_or_equal( input1, input2, output );
 
     circuit_generator.conclude();
+
+    circuit_generator.add_output(output);
 }
 
-void test_libscapi() {
-    CircuitGenerator circuit_generator(
-        CircuitType::BRISTOL,
-        {4, 4},
-        {4}
+void test_comparator() {
+    gabe::circuits::generator::BristolGenerator circuit_generator(
+        "BristolCircuit_comparator.txt",
+        { 8, 8 },
+        { 1, 1, 1 }
     );
 
-    gabe::circuits::Variable input1(4);
-    gabe::circuits::Variable input2(4);
-    gabe::circuits::Variable output(4);
+    gabe::circuits::Variable input1(8);
+    gabe::circuits::Variable input2(8);
+    gabe::circuits::Variable output_equal(1);
+    gabe::circuits::Variable output_greater(1);
+    gabe::circuits::Variable output_smaller(1);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
 
     circuit_generator.start();
 
-    circuit_generator.addition( input1, input2, output );
+    circuit_generator.comparator( input1, input2, output_equal, output_greater, output_smaller );
 
     circuit_generator.conclude();
 
-    circuit_generator.add_output(output);
+    circuit_generator.add_output(output_equal);
+    circuit_generator.add_output(output_greater);
+    circuit_generator.add_output(output_smaller);
 }
 
 int main() {
@@ -345,13 +359,13 @@ int main() {
     //test_subtraction();
     //test_multiplication();
     //test_division();
-    test_multiplexer();
+    //test_multiplexer();
     //test_equal();
     //test_greater();
     //test_smaller();
     //test_greater_or_equal();
     //test_smaller_or_equal();
-    //test_libscapi();
+    test_comparator();
 
     return 0;
 }
