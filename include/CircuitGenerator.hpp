@@ -448,12 +448,18 @@ namespace gabe
                 std::unordered_map<std::string, std::string> _gates_map;
 
                 // Zero and One wires
-                Wire _zero;
-                Wire _one;
+                Wire _zero_wire;
+                Wire _one_wire;
 
                 // Circuit info
+                std::vector<uint64_t> _number_wires_input_parties;
+                std::vector<uint64_t> _number_wires_output_parties;
                 uint64_t _counter_gates = 0x00;
                 uint64_t _counter_wires = 0x00;
+
+                // Circuit control variables
+                uint64_t _expected_input_wires = 0x00;
+                uint64_t _expected_output_wires = 0x00;
 
                 // Circuit printable control variables
                 uint64_t _counter_xor_gates = 0x00;
@@ -465,14 +471,42 @@ namespace gabe
                 CircuitGenerator();
                 CircuitGenerator(const std::string& circuit_file, const std::vector<uint64_t>& number_wires_input_parties, const std::vector<uint64_t>& number_wires_output_parties);
 
+                void _assert_equal_size(const Variable& var1, const Variable& var2);
+
+                void _write_header();
+                void _write_circuit();
+
                 void _write_1_1_gate(const uint64_t in, const uint64_t out, const std::string& gate);
                 void _write_2_1_gate(const uint64_t in1, const uint64_t in2, const uint64_t out, const std::string& gate);
 
-            public:
                 void _xor_gate(const Wire& in1, const Wire& in2, Wire& out);
                 void _and_gate(const Wire& in1, const Wire& in2, Wire& out);
                 void _inv_gate(const Wire& in, Wire& out);
                 void _or_gate(const Wire& in1, const Wire& in2, Wire& out);
+
+            public:
+                void start();
+                void conclude();
+
+                void add_input(Variable& input);
+                void add_output(Variable& output);
+
+                Variable create_constant(uint8_t n_bits, uint64_t value);
+
+                // Basic operations
+                void XOR(const Variable& input1, const Variable& input2, Variable& output);
+                void AND(const Variable& input1, const Variable& input2, Variable& output);
+                void INV(const Variable& input, Variable& output);
+                void OR(const Variable& input1, const Variable& input2, Variable& output);
+
+                // Arithmetic operations
+                void addition(const Variable& input1, const Variable& input2, Variable& output);
+                void subtraction(const Variable& input1, const Variable& input2, Variable& output);
+                void multiplication(const Variable& input1, const Variable& input2, Variable& output);
+                void division(const Variable& input1, const Variable& input2, Variable& output);
+
+                // Conditional operations
+                void multiplexer(const Variable& control, const Variable& input1, const Variable& input2, Variable& output);
             
             public:
                 ~CircuitGenerator();

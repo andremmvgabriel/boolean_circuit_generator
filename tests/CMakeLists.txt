@@ -1,20 +1,20 @@
-add_executable( BristolCircuit
+add_executable( Generate_BristolCircuit
     generate_bristol_circuit.cpp
 )
-target_link_libraries( BristolCircuit
+target_link_libraries( Generate_BristolCircuit
     BooleanCircuits
 )
 
-add_executable( BristolCircuitTest
+add_executable( Test_BristolCircuit
     test_bristol_circuit.cpp
 )
-target_link_libraries( BristolCircuitTest
+target_link_libraries( Test_BristolCircuit
     BooleanCircuits
 )
 
-add_executable( LibscapiCircuitTest
+add_executable( Test_LibscapiCircuit
     test_libscapi_circuit.cpp
 )
-target_link_libraries( LibscapiCircuitTest
+target_link_libraries( Test_LibscapiCircuit
     BooleanCircuits
 )

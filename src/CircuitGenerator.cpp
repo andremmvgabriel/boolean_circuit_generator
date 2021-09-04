@@ -239,15 +239,17 @@ void CircuitGenerator::conclude() {
 
 gabe::circuits::generator::CircuitGenerator::CircuitGenerator() {}
 
-gabe::circuits::generator::CircuitGenerator::CircuitGenerator(const std::string& circuit_file, const std::vector<uint64_t>& number_wires_input_parties, const std::vector<uint64_t>& number_wires_output_parties) {
+gabe::circuits::generator::CircuitGenerator::CircuitGenerator(const std::string& circuit_file, const std::vector<uint64_t>& number_wires_input_parties, const std::vector<uint64_t>& number_wires_output_parties) : _number_wires_input_parties(number_wires_input_parties), _number_wires_output_parties(number_wires_output_parties) {
     // Saves the temp file name
-    _temp_file_name = "temp_" + circuit_file + ".txt";
+    _temp_file_name = "temp_" + circuit_file;
 
     // Opens the files
-    _circuit_file = std::ofstream( circuit_file + ".txt", std::ios::out );
+    _circuit_file = std::ofstream( circuit_file, std::ios::out );
     _temp_file = std::fstream( _temp_file_name, std::ios::in | std::ios::out | std::ios::trunc );
 
-    // Registers the input wires
+    // Registers the expected wires for inputs and outputs
+    for (auto & amount : number_wires_input_parties) { _expected_input_wires += amount; }
+    for (auto & amount : number_wires_output_parties) { _expected_output_wires += amount; }
 }
 
 gabe::circuits::generator::CircuitGenerator::~CircuitGenerator() {
@@ -259,36 +261,43 @@ gabe::circuits::generator::CircuitGenerator::~CircuitGenerator() {
     remove( _temp_file_name.c_str() );
 }
 
-void gabe::circuits::generator::CircuitGenerator::_xor_gate(const Wire& in1, const Wire& in2, Wire& out) {
-    // Increments the counters
-    _counter_gates++;
-    _counter_xor_gates++;
-
-    _write_2_1_gate( in1.label, in2.label, out.label = ++_counter_wires, "XOR" );
+void gabe::circuits::generator::CircuitGenerator::_assert_equal_size(const Variable& var1, const Variable& var2) {
+    if (var1.number_wires != var2.number_wires) {
+        throw std::invalid_argument("The inserted variables do not share the same size.");
+    }
 }
 
-void gabe::circuits::generator::CircuitGenerator::_and_gate(const Wire& in1, const Wire& in2, Wire& out) {
-    // Increments the counters
-    _counter_gates++;
-    _counter_and_gates++;
+void gabe::circuits::generator::CircuitGenerator::_write_header() {
+    std::string sbreak = "\n";
 
-    _write_2_1_gate( in1.label, in2.label, out.label = ++_counter_wires, "AND" );
+    std::string header = std::to_string(_counter_gates) + " " + std::to_string(_counter_wires);
+
+    std::string inputs = std::to_string(_number_wires_input_parties.size());
+    for (auto & amount : _number_wires_input_parties) {
+        inputs += " " + std::to_string(amount);
+    }
+
+    std::string outputs = std::to_string(_number_wires_output_parties.size());
+    for (auto & amount : _number_wires_output_parties) {
+        outputs += " " + std::to_string(amount);
+    }
+
+    // Writes the header
+    _circuit_file.write( (header + sbreak).c_str(), (header + sbreak).size() );
+    _circuit_file.write( (inputs + sbreak).c_str(), (inputs + sbreak).size() );
+    _circuit_file.write( (outputs + sbreak).c_str(), (outputs + sbreak).size() );
+    _circuit_file.write( sbreak.c_str(), sbreak.size() );
 }
 
-void gabe::circuits::generator::CircuitGenerator::_inv_gate(const Wire& in, Wire& out) {
-    // Increments the counters
-    _counter_gates++;
-    _counter_inv_gates++;
+void gabe::circuits::generator::CircuitGenerator::_write_circuit() {
+    // Places the reading pointer in the beginning of the file
+    _temp_file.seekg(0);
 
-    _write_1_1_gate( in.label, out.label = ++_counter_wires, "INV" );
-}
-
-void gabe::circuits::generator::CircuitGenerator::_or_gate(const Wire& in1, const Wire& in2, Wire& out) {
-    // Increments the counters
-    _counter_gates++;
-    _counter_or_gates++;
-
-    _write_2_1_gate( in1.label, in2.label, out.label = ++_counter_wires, "OR" );
+    std::string line;
+    while (std::getline(_temp_file, line)) {
+        line += "\n";
+        _circuit_file.write(line.c_str(), line.size());
+    }
 }
 
 void gabe::circuits::generator::CircuitGenerator::_write_1_1_gate(const uint64_t in, const uint64_t out, const std::string& gate) {
@@ -305,4 +314,241 @@ void gabe::circuits::generator::CircuitGenerator::_write_2_1_gate(const uint64_t
     std::string line = "2 1 " + input1 + " " + input2 + " " + std::to_string(out) + " " + gate + "\n";
 
     _temp_file.write( line.c_str(), line.size() );
+}
+
+void gabe::circuits::generator::CircuitGenerator::_xor_gate(const Wire& in1, const Wire& in2, Wire& out) {
+    // Increments the counters
+    _counter_gates++;
+    _counter_xor_gates++;
+
+    _write_2_1_gate( in1.label, in2.label, out.label = _counter_wires++, "XOR" );
+}
+
+void gabe::circuits::generator::CircuitGenerator::_and_gate(const Wire& in1, const Wire& in2, Wire& out) {
+    // Increments the counters
+    _counter_gates++;
+    _counter_and_gates++;
+
+    _write_2_1_gate( in1.label, in2.label, out.label = _counter_wires++, "AND" );
+}
+
+void gabe::circuits::generator::CircuitGenerator::_inv_gate(const Wire& in, Wire& out) {
+    // Increments the counters
+    _counter_gates++;
+    _counter_inv_gates++;
+
+    _write_1_1_gate( in.label, out.label = _counter_wires++, "INV" );
+}
+
+void gabe::circuits::generator::CircuitGenerator::_or_gate(const Wire& in1, const Wire& in2, Wire& out) {
+    // Increments the counters
+    _counter_gates++;
+    _counter_or_gates++;
+
+    _write_2_1_gate( in1.label, in2.label, out.label = _counter_wires++, "OR" );
+}
+
+void gabe::circuits::generator::CircuitGenerator::start() {
+    // Checks if all the inputs wires were assigned
+    if (_counter_wires < _expected_input_wires) {
+        printf("\n>>> WARNING: There are less input wires assigned than expected. [%ld, %ld] wires are dead in the circuit.\n\n", _counter_wires, _expected_input_wires - 1);
+        _counter_wires = _expected_input_wires;
+    }
+    
+    // Creates the zero and one wires
+    _xor_gate( Wire(), Wire(), _zero_wire );
+    _inv_gate( _zero_wire, _one_wire );
+
+    printf("Zero wire: %ld\n", _zero_wire.label);
+    printf("One wire: %ld\n", _one_wire.label);
+}
+
+void gabe::circuits::generator::CircuitGenerator::conclude() {
+    printf("> Final circuit details:\n");
+    printf("   - TOTAL gates: %ld\n", _counter_gates);
+    printf("   - TOTAL wires: %ld\n", _counter_wires);
+    printf("   - XOR gates: %ld\n", _counter_xor_gates);
+    printf("   - AND gates: %ld\n", _counter_and_gates);
+    printf("   - INV gates: %ld\n", _counter_inv_gates);
+    printf("   - OR gates: %ld\n", _counter_or_gates);
+
+    _write_header();
+    _write_circuit();
+}
+
+void gabe::circuits::generator::CircuitGenerator::add_input(Variable& input) {
+    // Goes through all the input wires
+    for (auto & wire : input.wires) {
+        // Safety check
+        if (_counter_wires >= _expected_input_wires) {
+            throw std::runtime_error("There aren't enough input wires available. Make sure the specified input wires for each party are correct.");
+        }
+
+        // Assigns a label to the current wire
+        wire.label = _counter_wires++;
+    }
+}
+
+void gabe::circuits::generator::CircuitGenerator::add_output(Variable& output) {}
+
+gabe::circuits::Variable gabe::circuits::generator::CircuitGenerator::create_constant(uint8_t n_bits, uint64_t value) {
+    // Creates a Variable with the wanted size
+    gabe::circuits::Variable constant(n_bits);
+
+    // Assigns the correct wires to the constant
+    for (int i = 0; i < n_bits; i++) {
+        // Gets the correct value
+        uint8_t cur_val = (value >> i) & 0x01;
+
+        // Assigns zero or one wire label to the current wire
+        constant.wires[i].label = cur_val == 0 ? _zero_wire.label : _one_wire.label;
+
+        // Registers the value
+        // constant.wires[i].value = value;
+    }
+
+    return constant;
+}
+
+void gabe::circuits::generator::CircuitGenerator::XOR(const Variable& input1, const Variable& input2, Variable& output) {
+    // Safety checks
+    _assert_equal_size(input1, input2);
+    _assert_equal_size(input1, output);
+
+    // XORs all the wires
+    for (int i = 0; i < input1.number_wires; i++) {
+        _xor_gate( input1.wires[i], input2.wires[i], output.wires[i] );
+    }
+}
+
+void gabe::circuits::generator::CircuitGenerator::AND(const Variable& input1, const Variable& input2, Variable& output) {
+    // Safety checks
+    _assert_equal_size(input1, input2);
+    _assert_equal_size(input1, output);
+
+    // XORs all the wires
+    for (int i = 0; i < input1.number_wires; i++) {
+        _and_gate( input1.wires[i], input2.wires[i], output.wires[i] );
+    }
+}
+
+void gabe::circuits::generator::CircuitGenerator::INV(const Variable& input, Variable& output) {
+    // Safety checks
+    _assert_equal_size(input, output);
+
+    // XORs all the wires
+    for (int i = 0; i < input.number_wires; i++) {
+        _inv_gate( input.wires[i], output.wires[i] );
+    }
+}
+
+void gabe::circuits::generator::CircuitGenerator::OR(const Variable& input1, const Variable& input2, Variable& output) {
+    // Safety checks
+    _assert_equal_size(input1, input2);
+    _assert_equal_size(input1, output);
+
+    // XORs all the wires
+    for (int i = 0; i < input1.number_wires; i++) {
+        _or_gate( input1.wires[i], input2.wires[i], output.wires[i] );
+    }
+}
+
+void gabe::circuits::generator::CircuitGenerator::addition(const Variable& input1, const Variable& input2, Variable& output) {
+    // Safety check
+    _assert_equal_size(input1, input2);
+    _assert_equal_size(input1, output);
+
+    Variable carry = create_constant(output.number_wires, 0);
+
+    Variable a_xor_b(input1.number_wires);
+    Variable a_and_b(input1.number_wires);
+    Variable a_xor_b_and_c(input1.number_wires);
+
+    for (int i = 0; i < output.number_wires; i++) {
+        _xor_gate( input1.wires[i], input2.wires[i], a_xor_b.wires[i] );
+
+        if (i != output.number_wires - 1) {
+            _and_gate( input1.wires[i], input2.wires[i], a_and_b.wires[i] );
+            _and_gate( a_xor_b.wires[i], carry.wires[i], a_xor_b_and_c.wires[i] );
+            _or_gate( a_and_b.wires[i], a_xor_b_and_c.wires[i], carry.wires[i + 1] );
+        }
+    }
+
+    for (int i = 0; i < output.number_wires; i++) {
+        _xor_gate( a_xor_b.wires[i], carry.wires[i], output.wires[i] );
+    }
+}
+
+void gabe::circuits::generator::CircuitGenerator::subtraction(const Variable& input1, const Variable& input2, Variable& output) {
+    // Safety check
+    _assert_equal_size(input1, input2);
+    _assert_equal_size(input1, output);
+
+    Variable carry = create_constant(output.number_wires, 0);
+
+    Variable a_xor_b(output.number_wires);
+    Variable inv_xor(output.number_wires);
+    Variable inv_a(output.number_wires);
+    Variable and_xor(output.number_wires);
+    Variable and_a_c(output.number_wires);
+
+    for (int i = 0; i < output.number_wires; i++) {
+        _xor_gate( input1.wires[i], input2.wires[i], a_xor_b.wires[i] );
+        if (i != output.number_wires-1) {
+            _inv_gate( a_xor_b.wires[i], inv_xor.wires[i] );
+            _inv_gate( input1.wires[i], inv_a.wires[i] );
+            _and_gate( inv_xor.wires[i], carry.wires[i], and_xor.wires[i] );
+            _and_gate( inv_a.wires[i], input2.wires[i], and_a_c.wires[i] );
+            _or_gate( and_xor.wires[i], and_a_c.wires[i], carry.wires[i+1] );
+        }
+    }
+
+    for (int i = 0; i < output.number_wires; i++) {
+        _xor_gate( a_xor_b.wires[i], carry.wires[i], output.wires[i] );
+    }
+}
+
+void gabe::circuits::generator::CircuitGenerator::multiplication(const Variable& input1, const Variable& input2, Variable& output) {
+    // Safety check
+    // MISSING
+
+    std::vector<Variable> variables(input2.number_wires);
+
+    // Creation of the multiple variables
+    for (int i = 0; i < input2.number_wires; i++) {
+        variables.at(i) = create_constant(output.number_wires, 0x00);
+
+        for (int j = 0; j < input1.number_wires; j++) {
+            _and_gate( input1.wires[j], input2.wires[i], variables.at(i).wires[i+j] );
+        }
+    }
+
+    for (int i = 1; i < variables.size() ; i++) {
+        if (i == 1) {
+            addition( variables.at(i-1), variables.at(i), output );
+        }
+        else {
+            addition( output, variables.at(i), output );
+        }
+    }
+}
+
+void gabe::circuits::generator::CircuitGenerator::division(const Variable& input1, const Variable& input2, Variable& output) {}
+
+void gabe::circuits::generator::CircuitGenerator::multiplexer(const Variable& control, const Variable& input1, const Variable& input2, Variable& output) {
+    // Creates the not control
+    Variable not_control(control.number_wires);
+    INV(control, not_control);
+
+    Variable and_in1(input1.number_wires);
+    Variable and_in2(input2.number_wires);
+
+    for (int i = 0; i < input1.number_wires; i++) {
+        _and_gate( not_control.wires[0], input1.wires[i], and_in1.wires[i] );
+        _and_gate( control.wires[0], input2.wires[i], and_in2.wires[i] );
+    }
+
+    for (int i = 0; i < output.number_wires; i++) {
+        _or_gate( and_in1.wires[i], and_in2.wires[i], output.wires[i] );
+    }
 }

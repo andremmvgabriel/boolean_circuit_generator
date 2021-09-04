@@ -44,7 +44,7 @@ void gabe::circuits::test::BristolTester::read_header() {
             uint64_t current_pos = _circuit_file.tellg();
 
             // Returns the pointer back the whole string size
-            _circuit_file.seekg( current_pos - line.size() - 2 );
+            _circuit_file.seekg( current_pos - line.size() - 1 );
 
             // Registers the beginning position of the circuit
             _circuit_start = _circuit_file.tellg();
@@ -110,8 +110,6 @@ void gabe::circuits::test::BristolTester::execute_circuit() {
 
         gate_info >> n_input_wires >> n_output_wires;
 
-        printf("%d %d \n", n_input_wires, n_output_wires);
-
         std::vector<uint64_t> input_wires(n_input_wires);
         std::vector<uint64_t> output_wires(n_output_wires);
 
@@ -142,6 +140,11 @@ void gabe::circuits::test::BristolTester::execute_circuit() {
             throw std::runtime_error("The gate is not recognized.");
         }
     }
+
+    printf("> Output wires: ");
+    for (int j = _number_wires_output_parties.at(0); j > 0 ; j--) {
+        printf("%d ", _number_wires - j );
+    } printf("\n");
 
     printf("> Output wires values: ");
     for (int j = _number_wires_output_parties.at(0); j > 0 ; j--) {
