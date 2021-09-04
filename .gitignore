@@ -31,6 +31,9 @@
 *.out
 *.app
 
+# From here was me
 build/*
 bin/*
-lib/*
+
+.vscode
+*.txt
