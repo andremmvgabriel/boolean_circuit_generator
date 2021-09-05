@@ -13,21 +13,32 @@ gabe::circuits::generator::LibscapiGenerator::LibscapiGenerator(const std::strin
 void gabe::circuits::generator::LibscapiGenerator::_write_header() {
     std::string sbreak = "\n";
 
-    std::string header = std::to_string(_counter_gates) + " " + std::to_string(_counter_wires);
+    std::string header = std::to_string(_counter_gates) + " " + std::to_string(_number_wires_input_parties.size()) + sbreak + sbreak;
 
-    std::string inputs = std::to_string(_number_wires_input_parties.size());
-    for (auto & amount : _number_wires_input_parties) {
-        inputs += " " + std::to_string(amount);
+    uint64_t assigned_inputs = 0x00;
+    std::string inputs;
+    for (int i = 0; i < _number_wires_input_parties.size(); i++) {
+        inputs += std::to_string(i + 1) + " " + std::to_string(_number_wires_input_parties.at(i)) + sbreak;
+        for (uint64_t j = 0; j < _number_wires_input_parties.at(i); j++) {
+            inputs += std::to_string(j + assigned_inputs) + sbreak;
+        }
+        inputs += sbreak;
+        assigned_inputs += _number_wires_input_parties.at(i);
     }
 
-    std::string outputs = std::to_string(_number_wires_output_parties.size());
-    for (auto & amount : _number_wires_output_parties) {
-        outputs += " " + std::to_string(amount);
+    uint64_t assigned_outputs = 0x00;
+    std::string outputs;
+    for (int i = 0; i < _number_wires_output_parties.size(); i++) {
+        outputs += std::to_string(i + 1) + " " + std::to_string(_number_wires_output_parties.at(i)) + sbreak;
+        for (uint64_t j = _number_wires_output_parties.at(i); j > 0; j--) {
+            outputs += std::to_string( _counter_wires - j - assigned_outputs) + sbreak;
+        }
+        outputs += sbreak;
+        assigned_outputs += _number_wires_output_parties.at(i);
     }
 
     // Writes the header
-    _circuit_file.write( (header + sbreak).c_str(), (header + sbreak).size() );
-    _circuit_file.write( (inputs + sbreak).c_str(), (inputs + sbreak).size() );
-    _circuit_file.write( (outputs + sbreak).c_str(), (outputs + sbreak).size() );
-    _circuit_file.write( sbreak.c_str(), sbreak.size() );
+    _circuit_file.write( header.c_str(), header.size() );
+    _circuit_file.write( inputs.c_str(), inputs.size() );
+    _circuit_file.write( outputs.c_str(), outputs.size() );
 }

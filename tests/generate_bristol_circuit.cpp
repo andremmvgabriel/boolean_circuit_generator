@@ -94,13 +94,13 @@ void test_or() {
 void test_addition() {
     gabe::circuits::generator::BristolGenerator circuit_generator(
         "BristolCircuit_addition.txt",
-        { 8, 8 },
-        { 8 }
+        { 4, 4 },
+        { 4 }
     );
 
-    gabe::circuits::Variable input1(8);
-    gabe::circuits::Variable input2(8);
-    gabe::circuits::Variable output(8);
+    gabe::circuits::Variable input1(4);
+    gabe::circuits::Variable input2(4);
+    gabe::circuits::Variable output(4);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -365,7 +365,7 @@ int main() {
     //test_smaller();
     //test_greater_or_equal();
     //test_smaller_or_equal();
-    test_comparator();
+    //test_comparator();
 
     return 0;
 }
