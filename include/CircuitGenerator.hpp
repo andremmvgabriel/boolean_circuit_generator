@@ -23,7 +23,12 @@ namespace gabe
                 std::string _temp_file_name;
 
                 // 
-                std::unordered_map<std::string, std::string> _gates_map;
+                std::unordered_map<std::string, std::string> _gates_map = {
+                    {"xor", ""},
+                    {"and", ""},
+                    {"inv", ""},
+                    {"or", ""},
+                };
 
                 // Zero and One wires
                 Wire _zero_wire;
@@ -51,8 +56,8 @@ namespace gabe
 
                 void _assert_equal_size(const Variable& var1, const Variable& var2);
 
-                void _write_header();
-                void _write_circuit();
+                virtual void _write_header();
+                virtual void _write_circuit();
 
                 void _write_1_1_gate(const uint64_t in, const uint64_t out, const std::string& gate);
                 void _write_2_1_gate(const uint64_t in1, const uint64_t in2, const uint64_t out, const std::string& gate);

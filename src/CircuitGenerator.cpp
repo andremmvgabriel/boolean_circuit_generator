@@ -30,27 +30,7 @@ void gabe::circuits::generator::CircuitGenerator::_assert_equal_size(const Varia
     }
 }
 
-void gabe::circuits::generator::CircuitGenerator::_write_header() {
-    std::string sbreak = "\n";
-
-    std::string header = std::to_string(_counter_gates) + " " + std::to_string(_counter_wires);
-
-    std::string inputs = std::to_string(_number_wires_input_parties.size());
-    for (auto & amount : _number_wires_input_parties) {
-        inputs += " " + std::to_string(amount);
-    }
-
-    std::string outputs = std::to_string(_number_wires_output_parties.size());
-    for (auto & amount : _number_wires_output_parties) {
-        outputs += " " + std::to_string(amount);
-    }
-
-    // Writes the header
-    _circuit_file.write( (header + sbreak).c_str(), (header + sbreak).size() );
-    _circuit_file.write( (inputs + sbreak).c_str(), (inputs + sbreak).size() );
-    _circuit_file.write( (outputs + sbreak).c_str(), (outputs + sbreak).size() );
-    _circuit_file.write( sbreak.c_str(), sbreak.size() );
-}
+void gabe::circuits::generator::CircuitGenerator::_write_header() {}
 
 void gabe::circuits::generator::CircuitGenerator::_write_circuit() {
     // Places the reading pointer in the beginning of the file
@@ -84,7 +64,7 @@ void gabe::circuits::generator::CircuitGenerator::_xor_gate(const Wire& in1, con
     _counter_gates++;
     _counter_xor_gates++;
 
-    _write_2_1_gate( in1.label, in2.label, _counter_wires, "XOR" );
+    _write_2_1_gate( in1.label, in2.label, _counter_wires, _gates_map["xor"] );
 
     out.label = _counter_wires++;
 }
@@ -94,7 +74,7 @@ void gabe::circuits::generator::CircuitGenerator::_and_gate(const Wire& in1, con
     _counter_gates++;
     _counter_and_gates++;
 
-    _write_2_1_gate( in1.label, in2.label, _counter_wires, "AND" );
+    _write_2_1_gate( in1.label, in2.label, _counter_wires, _gates_map["and"] );
 
     out.label = _counter_wires++;
 }
@@ -104,7 +84,7 @@ void gabe::circuits::generator::CircuitGenerator::_inv_gate(const Wire& in, Wire
     _counter_gates++;
     _counter_inv_gates++;
 
-    _write_1_1_gate( in.label, _counter_wires, "INV" );
+    _write_1_1_gate( in.label, _counter_wires, _gates_map["inv"] );
 
     out.label = _counter_wires++;
 }
@@ -114,7 +94,7 @@ void gabe::circuits::generator::CircuitGenerator::_or_gate(const Wire& in1, cons
     _counter_gates++;
     _counter_or_gates++;
 
-    _write_2_1_gate( in1.label, in2.label, _counter_wires, "OR" );
+    _write_2_1_gate( in1.label, in2.label, _counter_wires, _gates_map["or"] );
 
     out.label = _counter_wires++;
 }
