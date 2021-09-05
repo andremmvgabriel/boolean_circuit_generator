@@ -33,6 +33,7 @@ namespace gabe
                 uint64_t _number_wires = 0;
                 uint32_t _number_input_parties = 0;
                 uint32_t _number_output_parties = 0;
+                std::vector<std::vector<uint64_t>> _output_party_wires;
 
                 // Control variables
                 uint64_t _circuit_start = 0;
