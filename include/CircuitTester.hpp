@@ -49,6 +49,7 @@ namespace gabe
                 void execute_circuit();
             
             public:
+                // void load_circuit(const std::string& circuit);
                 void run(const std::string& inputs);
                 void run(const std::vector<uint8_t>& inputs);
             };

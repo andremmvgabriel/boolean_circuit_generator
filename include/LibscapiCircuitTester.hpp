@@ -10,9 +10,13 @@ namespace gabe
             {
             protected:
                 LibscapiTester();
+
+                virtual void read_header() override;
             
             public:
                 LibscapiTester(const std::string& circuit);
+
+                virtual ~LibscapiTester();
             };
         }
     }

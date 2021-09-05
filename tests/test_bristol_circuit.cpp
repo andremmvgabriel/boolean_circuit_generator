@@ -44,13 +44,13 @@ int main(int argc, char* argv[]) {
     switch (argc) {
         case 2: 
             test_circuit(
-                default_circuits[argv[1]],
+                default_circuits[ argv[1] ],
                 manual_input
             );
             break;
         case 3:
             test_circuit(
-                default_circuits[argv[1]],
+                default_circuits[ argv[1] ],
                 argv[2]
             );
             break;
