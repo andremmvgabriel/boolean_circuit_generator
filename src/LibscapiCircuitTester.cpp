@@ -2,7 +2,15 @@
 
 gabe::circuits::test::LibscapiTester::LibscapiTester() : TesterAbs() {}
 
-gabe::circuits::test::LibscapiTester::LibscapiTester(const std::string& circuit) : TesterAbs(circuit) { read_header(); }
+gabe::circuits::test::LibscapiTester::LibscapiTester(const std::string& circuit) : TesterAbs(circuit) {
+    read_header();
+    
+    // Assigns the correct gates
+    _gates_map["xor"] = "0110";
+    _gates_map["and"] = "0001";
+    _gates_map["inv"] = "10";
+    _gates_map["or"] = "0111";
+}
 
 gabe::circuits::test::LibscapiTester::~LibscapiTester() {}
 

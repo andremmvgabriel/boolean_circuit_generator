@@ -84,16 +84,16 @@ void gabe::circuits::test::TesterAbs::execute_circuit() {
         std::string gate;
         gate_info >> gate;
 
-        if (gate == "AND") {
+        if (gate == _gates_map["and"]) {
             _wire_values[output_wires.at(0)] = _wire_values.at(input_wires.at(0)) & _wire_values.at(input_wires.at(1));
         }
-        else if (gate == "OR") {
+        else if (gate == _gates_map["or"]) {
             _wire_values[output_wires.at(0)] = _wire_values.at(input_wires.at(0)) | _wire_values.at(input_wires.at(1));
         }
-        else if (gate == "XOR") {
+        else if (gate == _gates_map["xor"]) {
             _wire_values[output_wires.at(0)] = _wire_values.at(input_wires.at(0)) ^ _wire_values.at(input_wires.at(1));
         }
-        else if (gate == "INV") {
+        else if (gate == _gates_map["inv"]) {
             _wire_values[output_wires.at(0)] = !_wire_values.at(input_wires.at(0));
         }
         else {

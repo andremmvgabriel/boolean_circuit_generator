@@ -4,6 +4,12 @@ gabe::circuits::test::BristolTester::BristolTester() : TesterAbs() {}
 
 gabe::circuits::test::BristolTester::BristolTester(const std::string& circuit) : TesterAbs(circuit) {
     read_header();
+
+    // Assigns the correct gates
+    _gates_map["xor"] = "XOR";
+    _gates_map["and"] = "AND";
+    _gates_map["inv"] = "INV";
+    _gates_map["or"] = "OR";
 }
 
 gabe::circuits::test::BristolTester::~BristolTester() {}
@@ -46,8 +52,7 @@ void gabe::circuits::test::BristolTester::read_header() {
 #ifdef _WIN32
             // Returns the pointer back the whole string size
             _circuit_file.seekg( current_pos - line.size() - 2 );
-#endif
-#ifdef linux
+#else
             // Returns the pointer back the whole string size
             _circuit_file.seekg( current_pos - line.size() - 1 );
 #endif
