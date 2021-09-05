@@ -18,6 +18,7 @@ set( src_generator_lib
     src/CircuitTester.cpp
     src/BristolCircuitGenerator.cpp
     src/BristolCircuitTester.cpp
+    src/LibscapiCircuitGenerator.cpp
     src/LibscapiCircuitTester.cpp
     src/Variable.cpp
 )
