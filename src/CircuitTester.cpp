@@ -8,9 +8,9 @@ gabe::circuits::test::TesterAbs::~TesterAbs() {
     _circuit_file.close();
 }
 
-void gabe::circuits::test::TesterAbs::read_header() {}
+void gabe::circuits::test::TesterAbs::_read_header() {}
 
-void gabe::circuits::test::TesterAbs::read_inputs(const std::string& inputs) {
+void gabe::circuits::test::TesterAbs::_read_inputs(const std::string& inputs) {
     // Opens the input file
     std::ifstream inputs_file( inputs, std::ios::in );
 
@@ -42,7 +42,7 @@ void gabe::circuits::test::TesterAbs::read_inputs(const std::string& inputs) {
     inputs_file.close();
 }
 
-void gabe::circuits::test::TesterAbs::read_inputs(const std::vector<uint8_t>& inputs) {
+void gabe::circuits::test::TesterAbs::_read_inputs(const std::vector<uint8_t>& inputs) {
     // Reads and registers the values of the input wires
     uint64_t read_wires_counter = 0;
     for (auto & amount : _number_wires_input_parties) {
@@ -59,7 +59,7 @@ void gabe::circuits::test::TesterAbs::read_inputs(const std::vector<uint8_t>& in
     }
 }
 
-void gabe::circuits::test::TesterAbs::execute_circuit() {
+void gabe::circuits::test::TesterAbs::_execute_circuit() {
     //
     std::string line;
     while (std::getline(_circuit_file, line)) {
@@ -101,6 +101,10 @@ void gabe::circuits::test::TesterAbs::execute_circuit() {
         }
     }
 
+    _print_results();
+}
+
+void gabe::circuits::test::TesterAbs::_print_results() {
     printf("> Output wires: ");
     for (int j = _number_wires_output_parties.at(0); j > 0 ; j--) {
         printf("%d ", _number_wires - j );
@@ -114,10 +118,10 @@ void gabe::circuits::test::TesterAbs::execute_circuit() {
 
 void gabe::circuits::test::TesterAbs::run(const std::string& inputs) {
     // Reads the inputs
-    read_inputs(inputs);
+    _read_inputs(inputs);
 
     // Executes the circuit
-    execute_circuit();
+    _execute_circuit();
 
     // Returns the pointer to the start of the circuit
     _circuit_file.seekg( _circuit_start );
@@ -125,10 +129,10 @@ void gabe::circuits::test::TesterAbs::run(const std::string& inputs) {
 
 void gabe::circuits::test::TesterAbs::run(const std::vector<uint8_t>& inputs) {
     // Reads the inputs
-    read_inputs(inputs);
+    _read_inputs(inputs);
 
     // Executes the circuit
-    execute_circuit();
+    _execute_circuit();
 
     // Returns the pointer to the start of the circuit
     _circuit_file.seekg( _circuit_start );

@@ -11,7 +11,8 @@ namespace gabe
             protected:
                 LibscapiTester();
 
-                virtual void read_header() override;
+                virtual void _read_header() override;
+                virtual void _print_results() override;
             
             public:
                 LibscapiTester(const std::string& circuit);

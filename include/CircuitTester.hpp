@@ -45,10 +45,12 @@ namespace gabe
 
                 virtual ~TesterAbs();
 
-                virtual void read_header();
-                void read_inputs(const std::string& inputs);
-                void read_inputs(const std::vector<uint8_t>& inputs);
-                void execute_circuit();
+                virtual void _read_header();
+                void _read_inputs(const std::string& inputs);
+                void _read_inputs(const std::vector<uint8_t>& inputs);
+                void _execute_circuit();
+
+                virtual void _print_results();
             
             public:
                 // void load_circuit(const std::string& circuit);

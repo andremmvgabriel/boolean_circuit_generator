@@ -3,7 +3,7 @@
 gabe::circuits::test::BristolTester::BristolTester() : TesterAbs() {}
 
 gabe::circuits::test::BristolTester::BristolTester(const std::string& circuit) : TesterAbs(circuit) {
-    read_header();
+    _read_header();
 
     // Assigns the correct gates
     _gates_map["xor"] = "XOR";
@@ -14,7 +14,7 @@ gabe::circuits::test::BristolTester::BristolTester(const std::string& circuit) :
 
 gabe::circuits::test::BristolTester::~BristolTester() {}
 
-void gabe::circuits::test::BristolTester::read_header() {
+void gabe::circuits::test::BristolTester::_read_header() {
     // String to read all the lines
     std::string line;
 

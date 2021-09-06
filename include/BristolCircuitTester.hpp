@@ -13,7 +13,7 @@ namespace gabe
             protected:
                 BristolTester();
 
-                virtual void read_header() override;
+                virtual void _read_header() override;
 
             public:
                 BristolTester(const std::string& circuit);

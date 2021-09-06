@@ -3,7 +3,7 @@
 gabe::circuits::test::LibscapiTester::LibscapiTester() : TesterAbs() {}
 
 gabe::circuits::test::LibscapiTester::LibscapiTester(const std::string& circuit) : TesterAbs(circuit) {
-    read_header();
+    _read_header();
     
     // Assigns the correct gates
     _gates_map["xor"] = "0110";
@@ -14,7 +14,7 @@ gabe::circuits::test::LibscapiTester::LibscapiTester(const std::string& circuit)
 
 gabe::circuits::test::LibscapiTester::~LibscapiTester() {}
 
-void gabe::circuits::test::LibscapiTester::read_header() {
+void gabe::circuits::test::LibscapiTester::_read_header() {
     // TODO - Change this to be more dynamic
 
     // String to read all the lines
@@ -130,5 +130,21 @@ void gabe::circuits::test::LibscapiTester::read_header() {
     printf("   - Number output parties: %d\n", _number_output_parties);
     for (int i = 0; i < _number_output_parties; i++) {
         printf("      - Output party %d: %d wires\n", i, _number_wires_output_parties.at(i));
+    }
+}
+
+void gabe::circuits::test::LibscapiTester::_print_results() {
+    for (int i = 0; i < _number_output_parties; i++) {
+        printf("> Output party %d:\n", i);
+
+        printf("   - Wires: ");
+        for (auto & wire : _output_party_wires.at(i)) {
+            printf("%ld ", wire );
+        } printf("\n");
+
+        printf("   - Values: ");
+        for (auto & wire : _output_party_wires.at(i)) {
+            printf("%ld ", _wire_values[wire] );
+        } printf("\n");
     }
 }
