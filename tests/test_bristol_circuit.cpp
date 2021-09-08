@@ -9,6 +9,8 @@ std::unordered_map<std::string, std::string> default_circuits = {
     { "subtraction", "BristolCircuit_subtraction.txt" },  
     { "multiplication", "BristolCircuit_multiplication.txt" },
     { "division", "BristolCircuit_division.txt" },
+    { "division_quotient", "BristolCircuit_division_quotient.txt" },
+    { "division_remainder", "BristolCircuit_division_remainder.txt" },
     { "multiplexer", "BristolCircuit_multiplexer.txt" },
     { "equal", "BristolCircuit_equal.txt" },
     { "greater", "BristolCircuit_greater.txt" },

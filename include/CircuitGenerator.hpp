@@ -86,7 +86,9 @@ namespace gabe
                 void addition(const Variable& input1, const Variable& input2, Variable& output);
                 void subtraction(const Variable& input1, const Variable& input2, Variable& output);
                 void multiplication(const Variable& input1, const Variable& input2, Variable& output);
-                void division(const Variable& input1, const Variable& input2, Variable& output);
+                void division(const Variable& input1, const Variable& input2, Variable& output_quotient, Variable& output_remainder);
+                void division_quotient(const Variable& input1, const Variable& input2, Variable& output);
+                void division_remainder(const Variable& input1, const Variable& input2, Variable& output);
 
                 // Conditional operations
                 void multiplexer(const Variable& control, const Variable& input1, const Variable& input2, Variable& output);

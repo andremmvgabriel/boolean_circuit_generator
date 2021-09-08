@@ -147,7 +147,7 @@ gabe::circuits::Variable gabe::circuits::generator::CircuitGenerator::create_con
     gabe::circuits::Variable constant(n_bits);
 
     // Assigns the correct wires to the constant
-    for (int i = 0; i < n_bits; i++) {
+    for (uint8_t i = 0; i < n_bits; i++) {
         // Gets the correct value
         uint8_t cur_val = (value >> i) & 0x01;
 
@@ -284,7 +284,85 @@ void gabe::circuits::generator::CircuitGenerator::multiplication(const Variable&
     }
 }
 
-void gabe::circuits::generator::CircuitGenerator::division(const Variable& input1, const Variable& input2, Variable& output) {}
+void gabe::circuits::generator::CircuitGenerator::division(const Variable& input1, const Variable& input2, Variable& output_quotient, Variable& output_remainder) {
+    //
+    _assert_equal_size(input1, input2);
+
+    output_remainder = create_constant(output_remainder.number_wires, 0x00);
+
+    //
+    Variable zero = create_constant( input1.number_wires, 0x00 );
+
+    Variable control(1);
+
+    Variable subtractor(input1.number_wires);
+
+    for (int i = 0; i < input1.number_wires; i++) {
+        // Shifting
+        for (int j = output_remainder.number_wires-1; j > 0; j--) {
+            output_remainder.wires[j] = output_remainder.wires[j-1];
+            output_remainder.wires[j-1] = _zero_wire;
+        }
+
+        output_remainder.wires[0] = input1.wires[input1.number_wires - 1 - i];
+
+        //
+        greater_or_equal(output_remainder, input2, control);
+
+        //
+        multiplexer(control, zero, input2, subtractor);
+
+        //
+        subtraction(output_remainder, subtractor, output_remainder);
+
+        //
+        output_quotient.wires[input1.number_wires - 1 - i] = control.wires[0];
+    }
+}
+
+void gabe::circuits::generator::CircuitGenerator::division_quotient(const Variable& input1, const Variable& input2, Variable& output) {
+    //
+    _assert_equal_size(input1, input2);
+
+    Variable output_remainder = create_constant(input1.number_wires, 0x00);
+
+    //
+    Variable zero = create_constant( input1.number_wires, 0x00 );
+
+    Variable control(1);
+
+    Variable subtractor(input1.number_wires);
+
+    for (int i = 0; i < input1.number_wires; i++) {
+        // Shifting
+        for (int j = output_remainder.number_wires-1; j > 0; j--) {
+            output_remainder.wires[j] = output_remainder.wires[j-1];
+            output_remainder.wires[j-1] = _zero_wire;
+        }
+
+        output_remainder.wires[0] = input1.wires[input1.number_wires - 1 - i];
+
+        //
+        greater_or_equal(output_remainder, input2, control);
+
+        if (i != input1.number_wires - 1) {
+            //
+            multiplexer(control, zero, input2, subtractor);
+
+            //
+            subtraction(output_remainder, subtractor, output_remainder);
+        }
+
+        //
+        output.wires[input1.number_wires - 1 - i] = control.wires[0];
+    }
+}
+
+void gabe::circuits::generator::CircuitGenerator::division_remainder(const Variable& input1, const Variable& input2, Variable& output) {
+    Variable quotient(output.number_wires);
+
+    division(input1, input2, quotient, output);
+}
 
 void gabe::circuits::generator::CircuitGenerator::multiplexer(const Variable& control, const Variable& input1, const Variable& input2, Variable& output) {
     // Creates the not control
