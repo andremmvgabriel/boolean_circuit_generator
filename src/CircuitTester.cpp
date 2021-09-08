@@ -105,15 +105,25 @@ void gabe::circuits::test::TesterAbs::_execute_circuit() {
 }
 
 void gabe::circuits::test::TesterAbs::_print_results() {
-    printf("> Output wires: ");
-    for (int j = _number_wires_output_parties.at(0); j > 0 ; j--) {
-        printf("%d ", _number_wires - j );
-    } printf("\n");
+    uint64_t assigned = 0x00;
+    for (auto & amount : _number_wires_output_parties) { assigned += amount; }
 
-    printf("> Output wires values: ");
-    for (int j = _number_wires_output_parties.at(0); j > 0 ; j--) {
-        printf("%d ", _wire_values.at( _number_wires - j ) );
-    } printf("\n");
+    for (uint64_t i = 0; i < _number_wires_output_parties.size(); i++) {
+        printf("> Output party %ld:\n", i);
+        printf("   - Wires: ");
+        for (uint64_t j = _number_wires_output_parties.at(i); j > 0; j--) {
+            printf("%ld ", _number_wires - assigned + _number_wires_output_parties.at(i) - j);
+        }
+        printf("\n");
+
+        printf("   - Values: ");
+        for (uint64_t j = _number_wires_output_parties.at(i); j > 0; j--) {
+            printf("%ld ", _wire_values[_number_wires - assigned + _number_wires_output_parties.at(i) - j] );
+        }
+        printf("\n");
+
+        assigned -= _number_wires_output_parties.at(i);
+    }
 }
 
 void gabe::circuits::test::TesterAbs::run(const std::string& inputs) {
