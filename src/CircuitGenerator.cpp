@@ -22,11 +22,37 @@ gabe::circuits::generator::CircuitGenerator::~CircuitGenerator() {
 
     // Removes the temporary file from the system
     remove( _temp_file_name.c_str() );
+
+    // Informs the user if the output wires are as expected
+    if (_expected_output_wires != _counter_output_wires) {
+        printf(">>> Warning: The number of expected output wires do not match with the amount given. Expected: %ld; Given: %ld", _expected_output_wires, _counter_output_wires);
+    }
 }
+
+void gabe::circuits::generator::CircuitGenerator::_assert_empty(const Variable& variable) {
+    if (!variable.number_wires) { throw std::invalid_argument("The inserted variable does not have any wires."); }
+}
+
+void gabe::circuits::generator::CircuitGenerator::_assert_size(const Variable& variable, uint64_t size) {}
 
 void gabe::circuits::generator::CircuitGenerator::_assert_equal_size(const Variable& var1, const Variable& var2) {
     if (var1.number_wires != var2.number_wires) {
         throw std::invalid_argument("The inserted variables do not share the same size.");
+    }
+}
+
+void gabe::circuits::generator::CircuitGenerator::_make_same_size(Variable& var1, Variable& var2) {
+    if (var1.number_wires >= var2.number_wires) {
+        for (int i = var2.number_wires; i < var1.number_wires; i++) {
+            var2.number_wires++;
+            var2.wires.push_back(_zero_wire);
+        }
+    }
+    else {
+        for (int i = var1.number_wires; i < var2.number_wires; i++) {
+            var1.number_wires++;
+            var1.wires.push_back(_zero_wire);
+        }
     }
 }
 
@@ -140,7 +166,9 @@ void gabe::circuits::generator::CircuitGenerator::add_input(Variable& input) {
     }
 }
 
-void gabe::circuits::generator::CircuitGenerator::add_output(Variable& output) {}
+void gabe::circuits::generator::CircuitGenerator::add_output(Variable& output) {
+    _counter_output_wires += output.number_wires;
+}
 
 gabe::circuits::Variable gabe::circuits::generator::CircuitGenerator::create_constant(uint8_t n_bits, uint64_t value) {
     // Creates a Variable with the wanted size
@@ -161,10 +189,15 @@ gabe::circuits::Variable gabe::circuits::generator::CircuitGenerator::create_con
     return constant;
 }
 
-void gabe::circuits::generator::CircuitGenerator::XOR(const Variable& input1, const Variable& input2, Variable& output) {
+//void gabe::circuits::generator::CircuitGenerator::XOR(const Variable& input1, const Variable& input2, Variable& output) {
+void gabe::circuits::generator::CircuitGenerator::XOR(Variable input1, Variable input2, Variable& output) {
     // Safety checks
+    _assert_empty(input1);
+    _assert_empty(input2);
     _assert_equal_size(input1, input2);
-    _assert_equal_size(input1, output);
+
+    // Gives the correct size of the output
+    output = Variable(input1.number_wires);
 
     // XORs all the wires
     for (int i = 0; i < input1.number_wires; i++) {
@@ -172,42 +205,62 @@ void gabe::circuits::generator::CircuitGenerator::XOR(const Variable& input1, co
     }
 }
 
-void gabe::circuits::generator::CircuitGenerator::AND(const Variable& input1, const Variable& input2, Variable& output) {
+//void gabe::circuits::generator::CircuitGenerator::AND(const Variable& input1, const Variable& input2, Variable& output) {
+void gabe::circuits::generator::CircuitGenerator::AND(Variable input1, Variable input2, Variable& output) {
     // Safety checks
+    _assert_empty(input1);
+    _assert_empty(input2);
     _assert_equal_size(input1, input2);
-    _assert_equal_size(input1, output);
 
-    // XORs all the wires
+    // Gives the correct size of the output
+    output = Variable(input1.number_wires);
+
+    // ANDs all the wires
     for (int i = 0; i < input1.number_wires; i++) {
         _and_gate( input1.wires[i], input2.wires[i], output.wires[i] );
     }
 }
 
-void gabe::circuits::generator::CircuitGenerator::INV(const Variable& input, Variable& output) {
+//void gabe::circuits::generator::CircuitGenerator::INV(const Variable& input, Variable& output) {
+void gabe::circuits::generator::CircuitGenerator::INV(Variable input, Variable& output) {
     // Safety checks
-    _assert_equal_size(input, output);
+    _assert_empty(input);
 
-    // XORs all the wires
+    // Gives the correct size of the output
+    output = Variable(input.number_wires);
+
+    // Negates all the wires
     for (int i = 0; i < input.number_wires; i++) {
         _inv_gate( input.wires[i], output.wires[i] );
     }
 }
 
-void gabe::circuits::generator::CircuitGenerator::OR(const Variable& input1, const Variable& input2, Variable& output) {
+//void gabe::circuits::generator::CircuitGenerator::OR(const Variable& input1, const Variable& input2, Variable& output) {
+void gabe::circuits::generator::CircuitGenerator::OR(Variable input1, Variable input2, Variable& output) {
     // Safety checks
+    _assert_empty(input1);
+    _assert_empty(input2);
     _assert_equal_size(input1, input2);
-    _assert_equal_size(input1, output);
 
-    // XORs all the wires
+    // Gives the correct size of the output
+    output = Variable(input1.number_wires);
+
+    // ORs all the wires
     for (int i = 0; i < input1.number_wires; i++) {
         _or_gate( input1.wires[i], input2.wires[i], output.wires[i] );
     }
 }
 
-void gabe::circuits::generator::CircuitGenerator::addition(const Variable& input1, const Variable& input2, Variable& output) {
+//void gabe::circuits::generator::CircuitGenerator::addition(const Variable& input1, const Variable& input2, Variable& output) {
+void gabe::circuits::generator::CircuitGenerator::addition(Variable input1, Variable input2, Variable& output) {
     // Safety check
-    _assert_equal_size(input1, input2);
-    _assert_equal_size(input1, output);
+    _assert_empty(input1);
+    _assert_empty(input2);
+
+    _make_same_size(input1, input2);
+
+    // Gives the correct size of the output
+    output = Variable(input1.number_wires);
 
     Variable carry = create_constant(output.number_wires, 0);
 
@@ -396,7 +449,8 @@ void gabe::circuits::generator::CircuitGenerator::equal(const Variable& input1, 
         } else {
             _or_gate( xors.wires[i], output.wires[0], output.wires[0] );
         }
-    }
+        printf("%d ",i);
+    } printf("\n");
 
     INV(output, output);
 }
