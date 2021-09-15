@@ -1,4 +1,4 @@
-#include <Variable.hpp>
+#include <UnsignedVariable.hpp>
 #include <LibscapiCircuitGenerator.hpp>
 
 void test_xor() {
@@ -8,9 +8,9 @@ void test_xor() {
         { 8 }
     );
 
-    gabe::circuits::Variable input1(8);
-    gabe::circuits::Variable input2(8);
-    gabe::circuits::Variable output(8);
+    gabe::circuits::UnsignedVariable input1(8);
+    gabe::circuits::UnsignedVariable input2(8);
+    gabe::circuits::UnsignedVariable output(8);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -31,9 +31,9 @@ void test_and() {
         { 8 }
     );
 
-    gabe::circuits::Variable input1(8);
-    gabe::circuits::Variable input2(8);
-    gabe::circuits::Variable output(8);
+    gabe::circuits::UnsignedVariable input1(8);
+    gabe::circuits::UnsignedVariable input2(8);
+    gabe::circuits::UnsignedVariable output(8);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -54,8 +54,8 @@ void test_inv() {
         { 8 }
     );
 
-    gabe::circuits::Variable input(8);
-    gabe::circuits::Variable output(8);
+    gabe::circuits::UnsignedVariable input(8);
+    gabe::circuits::UnsignedVariable output(8);
 
     circuit_generator.add_input(input);
 
@@ -75,9 +75,9 @@ void test_or() {
         { 8 }
     );
 
-    gabe::circuits::Variable input1(8);
-    gabe::circuits::Variable input2(8);
-    gabe::circuits::Variable output(8);
+    gabe::circuits::UnsignedVariable input1(8);
+    gabe::circuits::UnsignedVariable input2(8);
+    gabe::circuits::UnsignedVariable output(8);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -98,9 +98,9 @@ void test_addition() {
         { 8 }
     );
 
-    gabe::circuits::Variable input1(8);
-    gabe::circuits::Variable input2(8);
-    gabe::circuits::Variable output(8);
+    gabe::circuits::UnsignedVariable input1(8);
+    gabe::circuits::UnsignedVariable input2(8);
+    gabe::circuits::UnsignedVariable output(8);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -121,9 +121,9 @@ void test_subtraction() {
         { 8 }
     );
 
-    gabe::circuits::Variable input1(8);
-    gabe::circuits::Variable input2(8);
-    gabe::circuits::Variable output(8);
+    gabe::circuits::UnsignedVariable input1(8);
+    gabe::circuits::UnsignedVariable input2(8);
+    gabe::circuits::UnsignedVariable output(8);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -144,9 +144,9 @@ void test_multiplication() {
         { 8 }
     );
 
-    gabe::circuits::Variable input1(4);
-    gabe::circuits::Variable input2(4);
-    gabe::circuits::Variable output(8);
+    gabe::circuits::UnsignedVariable input1(4);
+    gabe::circuits::UnsignedVariable input2(4);
+    gabe::circuits::UnsignedVariable output(8);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -167,9 +167,9 @@ void test_division() {
         { 4 }
     );
 
-    gabe::circuits::Variable input1(8);
-    gabe::circuits::Variable input2(8);
-    gabe::circuits::Variable output(4);
+    gabe::circuits::UnsignedVariable input1(8);
+    gabe::circuits::UnsignedVariable input2(8);
+    gabe::circuits::UnsignedVariable output(4);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -190,10 +190,10 @@ void test_multiplexer() {
         { 8 }
     );
 
-    gabe::circuits::Variable control(1);
-    gabe::circuits::Variable input1(8);
-    gabe::circuits::Variable input2(8);
-    gabe::circuits::Variable output(8);
+    gabe::circuits::UnsignedVariable control(1);
+    gabe::circuits::UnsignedVariable input1(8);
+    gabe::circuits::UnsignedVariable input2(8);
+    gabe::circuits::UnsignedVariable output(8);
 
     circuit_generator.add_input(control);
     circuit_generator.add_input(input1);
@@ -215,9 +215,9 @@ void test_equal() {
         { 1 }
     );
 
-    gabe::circuits::Variable input1(8);
-    gabe::circuits::Variable input2(8);
-    gabe::circuits::Variable output(1);
+    gabe::circuits::UnsignedVariable input1(8);
+    gabe::circuits::UnsignedVariable input2(8);
+    gabe::circuits::UnsignedVariable output(1);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -238,9 +238,9 @@ void test_greater() {
         { 1 }
     );
 
-    gabe::circuits::Variable input1(8);
-    gabe::circuits::Variable input2(8);
-    gabe::circuits::Variable output(1);
+    gabe::circuits::UnsignedVariable input1(8);
+    gabe::circuits::UnsignedVariable input2(8);
+    gabe::circuits::UnsignedVariable output(1);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -261,9 +261,9 @@ void test_smaller() {
         { 1 }
     );
 
-    gabe::circuits::Variable input1(8);
-    gabe::circuits::Variable input2(8);
-    gabe::circuits::Variable output(1);
+    gabe::circuits::UnsignedVariable input1(8);
+    gabe::circuits::UnsignedVariable input2(8);
+    gabe::circuits::UnsignedVariable output(1);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -284,9 +284,9 @@ void test_greater_or_equal() {
         { 1 }
     );
 
-    gabe::circuits::Variable input1(8);
-    gabe::circuits::Variable input2(8);
-    gabe::circuits::Variable output(1);
+    gabe::circuits::UnsignedVariable input1(8);
+    gabe::circuits::UnsignedVariable input2(8);
+    gabe::circuits::UnsignedVariable output(1);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -307,9 +307,9 @@ void test_smaller_or_equal() {
         { 1 }
     );
 
-    gabe::circuits::Variable input1(8);
-    gabe::circuits::Variable input2(8);
-    gabe::circuits::Variable output(1);
+    gabe::circuits::UnsignedVariable input1(8);
+    gabe::circuits::UnsignedVariable input2(8);
+    gabe::circuits::UnsignedVariable output(1);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -330,11 +330,11 @@ void test_comparator() {
         { 1, 1, 1 }
     );
 
-    gabe::circuits::Variable input1(8);
-    gabe::circuits::Variable input2(8);
-    gabe::circuits::Variable output_equal(1);
-    gabe::circuits::Variable output_greater(1);
-    gabe::circuits::Variable output_smaller(1);
+    gabe::circuits::UnsignedVariable input1(8);
+    gabe::circuits::UnsignedVariable input2(8);
+    gabe::circuits::UnsignedVariable output_equal(1);
+    gabe::circuits::UnsignedVariable output_greater(1);
+    gabe::circuits::UnsignedVariable output_smaller(1);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
