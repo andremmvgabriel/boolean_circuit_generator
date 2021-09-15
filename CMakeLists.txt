@@ -21,6 +21,8 @@ set( src_generator_lib
     src/LibscapiCircuitGenerator.cpp
     src/LibscapiCircuitTester.cpp
     src/Variable.cpp
+    src/UnsignedVariable.cpp
+    src/SignedVariable.cpp
 )
 add_library( BooleanCircuits STATIC ${src_generator_lib} )
 

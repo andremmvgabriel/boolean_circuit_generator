@@ -6,7 +6,8 @@
 #include <unordered_map>
 #include <stdio.h>
 
-#include <Variable.hpp>
+#include <UnsignedVariable.hpp>
+#include <SignedVariable.hpp>
 
 namespace gabe
 {
@@ -54,7 +55,11 @@ namespace gabe
                 CircuitGenerator();
                 CircuitGenerator(const std::string& circuit_file, const std::vector<uint64_t>& number_wires_input_parties, const std::vector<uint64_t>& number_wires_output_parties);
 
-                void _assert_equal_size(const Variable& var1, const Variable& var2);
+                void _assert_equal_size(const UnsignedVariable& var1, const UnsignedVariable& var2);
+                void _assert_equal_size(const SignedVariable& var1, const SignedVariable& var2);
+
+                UnsignedVariable _stou(const SignedVariable& input);
+                SignedVariable _utos(const UnsignedVariable& input);
 
                 virtual void _write_header();
                 virtual void _write_circuit();
@@ -71,31 +76,43 @@ namespace gabe
                 void start();
                 void conclude();
 
-                void add_input(Variable& input);
-                void add_output(Variable& output);
+                void add_input(UnsignedVariable& input);
+                void add_input(SignedVariable& input);
+                void add_output(UnsignedVariable& output);
+                void add_output(SignedVariable& output);
 
-                Variable create_constant(uint8_t n_bits, uint64_t value);
+                UnsignedVariable create_constant(uint8_t n_bits, uint64_t value);
+                //SignedVariable create_constant(uint8_t n_bits, int64_t value);
 
                 // Basic operations
-                void XOR(const Variable& input1, const Variable& input2, Variable& output);
-                void AND(const Variable& input1, const Variable& input2, Variable& output);
-                void INV(const Variable& input, Variable& output);
-                void OR(const Variable& input1, const Variable& input2, Variable& output);
+                void XOR(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+                void XOR(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
+                void AND(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+                void AND(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
+                void INV(const UnsignedVariable& input, UnsignedVariable& output);
+                void INV(const SignedVariable& input, SignedVariable& output);
+                void OR(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+                void OR(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
 
                 // Arithmetic operations
-                void addition(const Variable& input1, const Variable& input2, Variable& output);
-                void subtraction(const Variable& input1, const Variable& input2, Variable& output);
-                void multiplication(const Variable& input1, const Variable& input2, Variable& output);
-                void division(const Variable& input1, const Variable& input2, Variable& output);
+                void addition(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+                void subtraction(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+                void multiplication(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+                void multiplication(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
+                void division(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
 
                 // Conditional operations
-                void multiplexer(const Variable& control, const Variable& input1, const Variable& input2, Variable& output);
-                void equal(const Variable& input1, const Variable& input2, Variable& output);
-                void greater(const Variable& input1, const Variable& input2, Variable& output);
-                void smaller(const Variable& input1, const Variable& input2, Variable& output);
-                void greater_or_equal(const Variable& input1, const Variable& input2, Variable& output);
-                void smaller_or_equal(const Variable& input1, const Variable& input2, Variable& output);
-                void comparator(const Variable& input1, const Variable& input2, Variable& out_equal, Variable& out_greater, Variable &out_smaller);
+                void multiplexer(const UnsignedVariable& control, const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+                void equal(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+                void greater(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+                void smaller(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+                void greater_or_equal(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+                void smaller_or_equal(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+                void comparator(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& out_equal, UnsignedVariable& out_greater, UnsignedVariable &out_smaller);
+
+                // Complement operations
+                void complement_2s(const UnsignedVariable& input, UnsignedVariable& output);
+                void complement_2s(const SignedVariable& input, SignedVariable& output);
             
             public:
                 ~CircuitGenerator();
