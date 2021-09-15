@@ -99,7 +99,9 @@ namespace gabe
                 void subtraction(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
                 void multiplication(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
                 void multiplication(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
-                void division(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+                void division(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output_quotient, UnsignedVariable& output_remainder);
+                void division_quotient(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+                void division_remainder(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
                 void division(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
 
                 // Conditional operations

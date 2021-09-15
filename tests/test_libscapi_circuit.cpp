@@ -9,6 +9,8 @@ std::unordered_map<std::string, std::string> default_circuits = {
     { "subtraction", "LibscapiCircuit_subtraction.txt" },  
     { "multiplication", "LibscapiCircuit_multiplication.txt" },
     { "division", "LibscapiCircuit_division.txt" },
+    { "division_quotient", "LibscapiCircuit_division_quotient.txt" },
+    { "division_remainder", "LibscapiCircuit_division_remainder.txt" },
     { "multiplexer", "LibscapiCircuit_multiplexer.txt" },
     { "equal", "LibscapiCircuit_equal.txt" },
     { "greater", "LibscapiCircuit_greater.txt" },
