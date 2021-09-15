@@ -428,6 +428,8 @@ void gabe::circuits::generator::CircuitGenerator::multiplication(const SignedVar
 
 void gabe::circuits::generator::CircuitGenerator::division(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output) {}
 
+void gabe::circuits::generator::CircuitGenerator::division(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output) {}
+
 void gabe::circuits::generator::CircuitGenerator::multiplexer(const UnsignedVariable& control, const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output) {
     // Creates the not control
     UnsignedVariable not_control(control.number_wires);

@@ -100,6 +100,7 @@ namespace gabe
                 void multiplication(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
                 void multiplication(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
                 void division(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+                void division(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
 
                 // Conditional operations
                 void multiplexer(const UnsignedVariable& control, const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
