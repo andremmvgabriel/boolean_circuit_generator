@@ -233,29 +233,7 @@ void gabe::circuits::generator::CircuitGenerator::XOR(const UnsignedVariable& in
     }
 }
 
-void gabe::circuits::generator::CircuitGenerator::XOR(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output) {
-    // Safety checks
-    _assert_equal_size(input1, input2);
-    _assert_equal_size(input1, output);
-
-    // XORs all the wires
-    for (int i = 0; i < input1.number_wires; i++) {
-        _xor_gate( input1.wires[i], input2.wires[i], output.wires[i] );
-    }
-}
-
 void gabe::circuits::generator::CircuitGenerator::AND(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output) {
-    // Safety checks
-    _assert_equal_size(input1, input2);
-    _assert_equal_size(input1, output);
-
-    // XORs all the wires
-    for (int i = 0; i < input1.number_wires; i++) {
-        _and_gate( input1.wires[i], input2.wires[i], output.wires[i] );
-    }
-}
-
-void gabe::circuits::generator::CircuitGenerator::AND(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output) {
     // Safety checks
     _assert_equal_size(input1, input2);
     _assert_equal_size(input1, output);
@@ -276,16 +254,6 @@ void gabe::circuits::generator::CircuitGenerator::INV(const UnsignedVariable& in
     }
 }
 
-void gabe::circuits::generator::CircuitGenerator::INV(const SignedVariable& input, SignedVariable& output) {
-    // Safety checks
-    _assert_equal_size(input, output);
-
-    // XORs all the wires
-    for (int i = 0; i < input.number_wires; i++) {
-        _inv_gate( input.wires[i], output.wires[i] );
-    }
-}
-
 void gabe::circuits::generator::CircuitGenerator::OR(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output) {
     // Safety checks
     _assert_equal_size(input1, input2);
@@ -294,6 +262,38 @@ void gabe::circuits::generator::CircuitGenerator::OR(const UnsignedVariable& inp
     // XORs all the wires
     for (int i = 0; i < input1.number_wires; i++) {
         _or_gate( input1.wires[i], input2.wires[i], output.wires[i] );
+    }
+}
+
+void gabe::circuits::generator::CircuitGenerator::XOR(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output) {
+    // Safety checks
+    _assert_equal_size(input1, input2);
+    _assert_equal_size(input1, output);
+
+    // XORs all the wires
+    for (int i = 0; i < input1.number_wires; i++) {
+        _xor_gate( input1.wires[i], input2.wires[i], output.wires[i] );
+    }
+}
+
+void gabe::circuits::generator::CircuitGenerator::AND(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output) {
+    // Safety checks
+    _assert_equal_size(input1, input2);
+    _assert_equal_size(input1, output);
+
+    // XORs all the wires
+    for (int i = 0; i < input1.number_wires; i++) {
+        _and_gate( input1.wires[i], input2.wires[i], output.wires[i] );
+    }
+}
+
+void gabe::circuits::generator::CircuitGenerator::INV(const SignedVariable& input, SignedVariable& output) {
+    // Safety checks
+    _assert_equal_size(input, output);
+
+    // XORs all the wires
+    for (int i = 0; i < input.number_wires; i++) {
+        _inv_gate( input.wires[i], output.wires[i] );
     }
 }
 
@@ -388,44 +388,6 @@ void gabe::circuits::generator::CircuitGenerator::multiplication(const UnsignedV
     }
 }
 
-void gabe::circuits::generator::CircuitGenerator::multiplication(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output) {
-    // Initial convertions
-    UnsignedVariable input1_u = _stou(input1);
-    UnsignedVariable input2_u = _stou(input2);
-    UnsignedVariable output_u(input1.number_wires + input2.number_wires);
-
-    // 2s complement Input 1
-    UnsignedVariable input1_2s_comp(input1_u.number_wires);
-    complement_2s(input1_u, input1_2s_comp);
-
-    // 2s complement Input 2
-    UnsignedVariable input2_2s_comp(input2_u.number_wires);
-    complement_2s(input2_u, input2_2s_comp);
-
-    // Signs - Control variables
-    UnsignedVariable input1_sign(1); input1_sign.wires[0] = input1_u.wires.back();
-    UnsignedVariable input2_sign(1); input2_sign.wires[0] = input2_u.wires.back();
-    UnsignedVariable xored_signs(1); XOR(input1_sign, input2_sign, xored_signs);
-
-    // Multiplexer outputs
-    UnsignedVariable mux1_output(input1.number_wires);
-    UnsignedVariable mux2_output(input2.number_wires);
-
-    multiplexer(input1_sign, input1_u, input1_2s_comp, mux1_output);
-    multiplexer(input2_sign, input2_u, input2_2s_comp, mux2_output);
-
-    UnsignedVariable mult_output(input1.number_wires + input2.number_wires);
-
-    multiplication(mux1_output, mux2_output, mult_output);
-
-    UnsignedVariable mult_2s_comp(mult_output.number_wires);
-    complement_2s(mult_output, mult_2s_comp);
-
-    multiplexer(xored_signs, mult_output, mult_2s_comp, output_u);
-
-    output = _utos(output_u);
-}
-
 void gabe::circuits::generator::CircuitGenerator::division(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output_quotient, UnsignedVariable& output_remainder) {
     //
     _assert_equal_size(input1, input2);
@@ -506,7 +468,90 @@ void gabe::circuits::generator::CircuitGenerator::division_remainder(const Unsig
     division(input1, input2, quotient, output);
 }
 
-void gabe::circuits::generator::CircuitGenerator::division(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output) {}
+void gabe::circuits::generator::CircuitGenerator::multiplication(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output) {
+    // Initial convertions
+    UnsignedVariable input1_u = _stou(input1);
+    UnsignedVariable input2_u = _stou(input2);
+    UnsignedVariable output_u(input1.number_wires + input2.number_wires);
+
+    // 2s complement Input 1
+    UnsignedVariable input1_2s_comp(input1_u.number_wires);
+    complement_2s(input1_u, input1_2s_comp);
+
+    // 2s complement Input 2
+    UnsignedVariable input2_2s_comp(input2_u.number_wires);
+    complement_2s(input2_u, input2_2s_comp);
+
+    // Signs - Control variables
+    UnsignedVariable input1_sign(1); input1_sign.wires[0] = input1_u.wires.back();
+    UnsignedVariable input2_sign(1); input2_sign.wires[0] = input2_u.wires.back();
+    UnsignedVariable xored_signs(1); XOR(input1_sign, input2_sign, xored_signs);
+
+    // Multiplexer outputs
+    UnsignedVariable mux1_output(input1.number_wires);
+    UnsignedVariable mux2_output(input2.number_wires);
+
+    multiplexer(input1_sign, input1_u, input1_2s_comp, mux1_output);
+    multiplexer(input2_sign, input2_u, input2_2s_comp, mux2_output);
+
+    UnsignedVariable mult_output(input1.number_wires + input2.number_wires);
+
+    multiplication(mux1_output, mux2_output, mult_output);
+
+    UnsignedVariable mult_2s_comp(mult_output.number_wires);
+    complement_2s(mult_output, mult_2s_comp);
+
+    multiplexer(xored_signs, mult_output, mult_2s_comp, output_u);
+
+    output = _utos(output_u);
+}
+
+void gabe::circuits::generator::CircuitGenerator::division(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output_quotient, SignedVariable& output_remainder) {
+    // Initial convertions
+    UnsignedVariable input1_u = _stou(input1);
+    UnsignedVariable input2_u = _stou(input2);
+
+    // Outputs
+    UnsignedVariable output_quotient_u(output_quotient.number_wires);
+    UnsignedVariable output_remainder_u(output_remainder.number_wires);
+
+    // 2s complement Input 1
+    UnsignedVariable input1_2s_comp(input1_u.number_wires);
+    complement_2s(input1_u, input1_2s_comp);
+
+    // 2s complement Input 2
+    UnsignedVariable input2_2s_comp(input2_u.number_wires);
+    complement_2s(input2_u, input2_2s_comp);
+
+    // Signs - Control variables
+    UnsignedVariable input1_sign(1); input1_sign.wires[0] = input1_u.wires.back();
+    UnsignedVariable input2_sign(1); input2_sign.wires[0] = input2_u.wires.back();
+    UnsignedVariable xored_signs(1); XOR(input1_sign, input2_sign, xored_signs);
+
+    // Multiplexer outputs
+    UnsignedVariable mux1_output(input1.number_wires);
+    UnsignedVariable mux2_output(input2.number_wires);
+
+    // Decide with values to use in the division
+    multiplexer(input1_sign, input1_u, input1_2s_comp, mux1_output);
+    multiplexer(input2_sign, input2_u, input2_2s_comp, mux2_output);
+
+    UnsignedVariable div_output_quotient(output_quotient.number_wires);
+
+    division(mux1_output, mux2_output, div_output_quotient, output_remainder_u);
+
+    UnsignedVariable div_quotient_2s_comp(div_output_quotient.number_wires);
+    complement_2s(div_output_quotient, div_quotient_2s_comp);
+
+    multiplexer(xored_signs, div_output_quotient, div_quotient_2s_comp, output_quotient_u);
+
+    output_quotient = _utos(output_quotient_u);
+    output_remainder = _utos(output_remainder_u);
+}
+
+void gabe::circuits::generator::CircuitGenerator::division_quotient(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output) {}
+
+void gabe::circuits::generator::CircuitGenerator::division_remainder(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output) {}
 
 void gabe::circuits::generator::CircuitGenerator::multiplexer(const UnsignedVariable& control, const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output) {
     // Creates the not control

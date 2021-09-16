@@ -217,6 +217,37 @@ void test_division() {
     circuit_generator.add_output(output_r);
 }
 
+void test_division_signed() {
+    gabe::circuits::generator::BristolGenerator circuit_generator(
+        "BristolCircuit_division_signed.txt",
+        { 8, 8 },
+        { 8, 8 }
+    );
+
+    gabe::circuits::SignedVariable input1(8);
+    gabe::circuits::SignedVariable input2(8);
+    gabe::circuits::SignedVariable output_q(8);
+    gabe::circuits::SignedVariable output_r(8);
+
+    circuit_generator.add_input(input1);
+    circuit_generator.add_input(input2);
+
+    circuit_generator.start();
+
+    circuit_generator.division(input1, input2, output_q, output_r);
+
+    // DELETE THIS - ONLY HERE TO MAKE SURE THE OUTPUTS ARE THE VERY LAST WIRES
+    circuit_generator.INV(output_q, output_q);
+    circuit_generator.INV(output_r, output_r);
+    circuit_generator.INV(output_q, output_q);
+    circuit_generator.INV(output_r, output_r);
+
+    circuit_generator.conclude();
+
+    circuit_generator.add_output(output_q);
+    circuit_generator.add_output(output_r);
+}
+
 void test_division_quotient() {
     gabe::circuits::generator::BristolGenerator circuit_generator(
         "BristolCircuit_division_quotient.txt",
@@ -446,10 +477,11 @@ int main() {
     //test_addition();
     //test_subtraction();
     //test_multiplication();
-    test_multiplication_signed();
-    test_division();
-    test_division_quotient();
-    test_division_remainder();
+    //test_multiplication_signed();
+    //test_division();
+    test_division_signed();
+    //test_division_quotient();
+    //test_division_remainder();
     //test_multiplexer();
     //test_equal();
     //test_greater();

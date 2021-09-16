@@ -84,25 +84,31 @@ namespace gabe
                 UnsignedVariable create_constant(uint8_t n_bits, uint64_t value);
                 //SignedVariable create_constant(uint8_t n_bits, int64_t value);
 
-                // Basic operations
+                // Basic unsigned operations
                 void XOR(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
-                void XOR(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
                 void AND(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
-                void AND(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
                 void INV(const UnsignedVariable& input, UnsignedVariable& output);
-                void INV(const SignedVariable& input, SignedVariable& output);
                 void OR(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
+
+                // Basic signed operations
+                void XOR(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
+                void AND(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
+                void INV(const SignedVariable& input, SignedVariable& output);
                 void OR(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
 
-                // Arithmetic operations
+                // Arithmetic unsigned operations
                 void addition(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
                 void subtraction(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
                 void multiplication(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
-                void multiplication(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
                 void division(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output_quotient, UnsignedVariable& output_remainder);
                 void division_quotient(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
                 void division_remainder(const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
-                void division(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
+
+                // Arithmetic signed operations
+                void multiplication(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
+                void division(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output_quotient, SignedVariable& output_remainder);
+                void division_quotient(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
+                void division_remainder(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output);
 
                 // Conditional operations
                 void multiplexer(const UnsignedVariable& control, const UnsignedVariable& input1, const UnsignedVariable& input2, UnsignedVariable& output);
