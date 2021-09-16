@@ -275,6 +275,33 @@ void test_division_quotient() {
     circuit_generator.add_output(output_q);
 }
 
+void test_division_quotient_signed() {
+    gabe::circuits::generator::BristolGenerator circuit_generator(
+        "BristolCircuit_division_quotient_signed.txt",
+        { 8, 8 },
+        { 8 }
+    );
+
+    gabe::circuits::SignedVariable input1(8);
+    gabe::circuits::SignedVariable input2(8);
+    gabe::circuits::SignedVariable output_q(8);
+
+    circuit_generator.add_input(input1);
+    circuit_generator.add_input(input2);
+
+    circuit_generator.start();
+
+    circuit_generator.division_quotient(input1, input2, output_q);
+
+    // DELETE THIS - ONLY HERE TO MAKE SURE THE OUTPUTS ARE THE VERY LAST WIRES
+    circuit_generator.INV(output_q, output_q);
+    circuit_generator.INV(output_q, output_q);
+
+    circuit_generator.conclude();
+
+    circuit_generator.add_output(output_q);
+}
+
 void test_division_remainder() {
     gabe::circuits::generator::BristolGenerator circuit_generator(
         "BristolCircuit_division_remainder.txt",
@@ -285,6 +312,33 @@ void test_division_remainder() {
     gabe::circuits::UnsignedVariable input1(8);
     gabe::circuits::UnsignedVariable input2(8);
     gabe::circuits::UnsignedVariable output_r(8);
+
+    circuit_generator.add_input(input1);
+    circuit_generator.add_input(input2);
+
+    circuit_generator.start();
+
+    circuit_generator.division_remainder(input1, input2, output_r);
+
+    // DELETE THIS - ONLY HERE TO MAKE SURE THE OUTPUTS ARE THE VERY LAST WIRES
+    circuit_generator.INV(output_r, output_r);
+    circuit_generator.INV(output_r, output_r);
+
+    circuit_generator.conclude();
+
+    circuit_generator.add_output(output_r);
+}
+
+void test_division_remainder_signed() {
+    gabe::circuits::generator::BristolGenerator circuit_generator(
+        "BristolCircuit_division_remainder_signed.txt",
+        { 8, 8 },
+        { 8 }
+    );
+
+    gabe::circuits::SignedVariable input1(8);
+    gabe::circuits::SignedVariable input2(8);
+    gabe::circuits::SignedVariable output_r(8);
 
     circuit_generator.add_input(input1);
     circuit_generator.add_input(input2);
@@ -481,7 +535,9 @@ int main() {
     //test_division();
     test_division_signed();
     //test_division_quotient();
+    test_division_quotient_signed();
     //test_division_remainder();
+    test_division_remainder_signed();
     //test_multiplexer();
     //test_equal();
     //test_greater();
