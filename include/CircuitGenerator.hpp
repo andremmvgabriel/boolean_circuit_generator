@@ -58,8 +58,8 @@ namespace gabe
                 void _assert_equal_size(const UnsignedVariable& var1, const UnsignedVariable& var2);
                 void _assert_equal_size(const SignedVariable& var1, const SignedVariable& var2);
 
-                UnsignedVariable _stou(const SignedVariable& input);
-                SignedVariable _utos(const UnsignedVariable& input);
+                UnsignedVariable _signed_to_unsigned(const SignedVariable& input);
+                SignedVariable _unsigned_to_signed(const UnsignedVariable& input);
 
                 virtual void _write_header();
                 virtual void _write_circuit();

@@ -36,7 +36,7 @@ void gabe::circuits::generator::CircuitGenerator::_assert_equal_size(const Signe
     }
 }
 
-gabe::circuits::UnsignedVariable gabe::circuits::generator::CircuitGenerator::_stou(const SignedVariable& input) {
+gabe::circuits::UnsignedVariable gabe::circuits::generator::CircuitGenerator::_signed_to_unsigned(const SignedVariable& input) {
     UnsignedVariable output(input.number_wires);
     
     for (int i = 0 ; i < input.number_wires; i++) {
@@ -46,7 +46,7 @@ gabe::circuits::UnsignedVariable gabe::circuits::generator::CircuitGenerator::_s
     return output;
 }
 
-gabe::circuits::SignedVariable gabe::circuits::generator::CircuitGenerator::_utos(const UnsignedVariable& input) {
+gabe::circuits::SignedVariable gabe::circuits::generator::CircuitGenerator::_unsigned_to_signed(const UnsignedVariable& input) {
     SignedVariable output(input.number_wires);
 
     for (int i = 0 ; i < input.number_wires; i++) {
@@ -470,8 +470,8 @@ void gabe::circuits::generator::CircuitGenerator::division_remainder(const Unsig
 
 void gabe::circuits::generator::CircuitGenerator::multiplication(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output) {
     // Initial convertions
-    UnsignedVariable input1_u = _stou(input1);
-    UnsignedVariable input2_u = _stou(input2);
+    UnsignedVariable input1_u = _signed_to_unsigned(input1);
+    UnsignedVariable input2_u = _signed_to_unsigned(input2);
     UnsignedVariable output_u(input1.number_wires + input2.number_wires);
 
     // 2s complement Input 1
@@ -503,13 +503,13 @@ void gabe::circuits::generator::CircuitGenerator::multiplication(const SignedVar
 
     multiplexer(xored_signs, mult_output, mult_2s_comp, output_u);
 
-    output = _utos(output_u);
+    output = _unsigned_to_signed(output_u);
 }
 
 void gabe::circuits::generator::CircuitGenerator::division(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output_quotient, SignedVariable& output_remainder) {
     // Initial convertions
-    UnsignedVariable input1_u = _stou(input1);
-    UnsignedVariable input2_u = _stou(input2);
+    UnsignedVariable input1_u = _signed_to_unsigned(input1);
+    UnsignedVariable input2_u = _signed_to_unsigned(input2);
 
     // Outputs
     UnsignedVariable output_quotient_u(output_quotient.number_wires);
@@ -543,14 +543,14 @@ void gabe::circuits::generator::CircuitGenerator::division(const SignedVariable&
 
     multiplexer(xored_signs, output_quotient_u, div_quotient_2s_comp, output_quotient_u);
 
-    output_quotient = _utos(output_quotient_u);
-    output_remainder = _utos(output_remainder_u);
+    output_quotient = _unsigned_to_signed(output_quotient_u);
+    output_remainder = _unsigned_to_signed(output_remainder_u);
 }
 
 void gabe::circuits::generator::CircuitGenerator::division_quotient(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output) {
     // Initial convertions
-    UnsignedVariable input1_u = _stou(input1);
-    UnsignedVariable input2_u = _stou(input2);
+    UnsignedVariable input1_u = _signed_to_unsigned(input1);
+    UnsignedVariable input2_u = _signed_to_unsigned(input2);
 
     // Outputs
     UnsignedVariable output_u(output.number_wires);
@@ -583,7 +583,7 @@ void gabe::circuits::generator::CircuitGenerator::division_quotient(const Signed
 
     multiplexer(xored_signs, output_u, div_quotient_2s_comp, output_u);
 
-    output = _utos(output_u);
+    output = _unsigned_to_signed(output_u);
 }
 
 void gabe::circuits::generator::CircuitGenerator::division_remainder(const SignedVariable& input1, const SignedVariable& input2, SignedVariable& output) {
@@ -770,10 +770,10 @@ void gabe::circuits::generator::CircuitGenerator::complement_2s(const UnsignedVa
 }
 
 void gabe::circuits::generator::CircuitGenerator::complement_2s(const SignedVariable& input, SignedVariable& output) {
-    UnsignedVariable input_u = _stou(input);
+    UnsignedVariable input_u = _signed_to_unsigned(input);
     UnsignedVariable output_u(input.number_wires);
 
     complement_2s(input_u, output_u);
 
-    output = _utos(output_u);
+    output = _unsigned_to_signed(output_u);
 }
