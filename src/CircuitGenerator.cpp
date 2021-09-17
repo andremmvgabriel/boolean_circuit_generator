@@ -614,15 +614,18 @@ void gabe::circuits::generator::CircuitGenerator::equal(const UnsignedVariable& 
     // Safety checks
     _assert_equal_size(input1, input2);
 
-    UnsignedVariable xors(input1.number_wires);
+    if (input1.number_wires == 1) {
+        XOR(input1, input2, output);
+    } else {
+        UnsignedVariable xors(input1.number_wires);
+        XOR(input1, input2, xors);
 
-    XOR(input1, input2, xors);
-
-    for (int i = 1; i < xors.number_wires; i++) {
-        if (i == 1) {
-            _or_gate( xors.wires[i-1], xors.wires[i], output.wires[0] );
-        } else {
-            _or_gate( xors.wires[i], output.wires[0], output.wires[0] );
+        for (int i = 1; i < xors.number_wires; i++) {
+            if (i == 1) {
+                _or_gate( xors.wires[i-1], xors.wires[i], output.wires[0] );
+            } else {
+                _or_gate( xors.wires[i], output.wires[0], output.wires[0] );
+            }
         }
     }
 
