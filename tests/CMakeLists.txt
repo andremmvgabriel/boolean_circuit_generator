@@ -39,16 +39,11 @@ target_link_libraries( Test_LibscapiCircuit
 
 ####
 
-add_executable( Generate_Average_Circuit
+add_executable( Average_Circuit
     average_function.cpp
 )
-target_link_libraries( Generate_Average_Circuit
+target_link_libraries( Average_Circuit
     BooleanCircuits
 )
 
-add_executable( Generate_AES_ECB_Circuit
-    aes_ecb_function.cpp
-)
-target_link_libraries( Generate_AES_ECB_Circuit
-    BooleanCircuits
-)
+
