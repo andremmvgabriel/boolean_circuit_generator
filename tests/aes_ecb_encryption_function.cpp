@@ -2,6 +2,7 @@
 #include <LibscapiCircuitTester.hpp>
 
 typedef gabe::circuits::generator::LibscapiGenerator LibGen;
+typedef gabe::circuits::test::LibscapiTester LibTest;
 typedef gabe::circuits::UnsignedVariable uVar;
 
 #include <stdint.h>
@@ -15,7 +16,7 @@ typedef gabe::circuits::UnsignedVariable uVar;
 // The number of rounds in AES Cipher.
 #define Nr 10
 
-static const uint8_t sbox[256] = {
+const uint8_t sbox[256] = {
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
     0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
     0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15,
@@ -34,7 +35,7 @@ static const uint8_t sbox[256] = {
     0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 };
 
-static const uint8_t rcon[255] = {
+const uint8_t rcon[255] = {
     0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a, 
     0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 
     0x72, 0xe4, 0xd3, 0xbd, 0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 
@@ -58,9 +59,8 @@ static const uint8_t rcon[255] = {
 uVar get_sbox_value(LibGen& circuit, uVar& index) {
     uVar output = circuit.create_constant( 8, 0x00 );
 
-    uVar control(1);
-
     for (int i = 0; i < 256; i++) {
+        uVar control(1);
         uVar cur_index = circuit.create_constant( 8, (uint8_t)i );
         uVar cur_sbox_value = circuit.create_constant( 8, sbox[i] );
 
@@ -71,10 +71,123 @@ uVar get_sbox_value(LibGen& circuit, uVar& index) {
     return output;
 }
 
+void array_to_matrix(std::vector<uVar>& array, std::vector<std::vector<uVar>>& matrix) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            matrix[i][j] = array[i * 4 + j];
+        }
+    }
+}
+
+void matrix_to_array(std::vector<std::vector<uVar>>& matrix, std::vector<uVar>& array) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            array[i * 4 + j] = matrix[i][j];
+        }
+    }
+}
+
+void add_round_key(LibGen& circuit, uint8_t round, std::vector<uVar>& round_key, std::vector<std::vector<uVar>>& state) {
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            circuit.XOR( state[i][j], round_key[round * Nb * 4 + i * Nb + j], state[i][j] );
+        }
+    }
+}
+
+void sub_bytes(LibGen& circuit, std::vector<std::vector<uVar>>& state) {
+    for(uint8_t i = 0; i < 4; ++i) {
+        for(uint8_t j = 0; j < 4; ++j) {
+            state[j][i] = get_sbox_value( circuit, state[j][i] );
+        }
+    }
+}
+
+void shift_rows(std::vector<std::vector<uVar>>& state)
+{
+    uVar temp;
+
+    // Rotate first row 1 columns to left  
+    temp        = state[0][1];
+    state[0][1] = state[1][1];
+    state[1][1] = state[2][1];
+    state[2][1] = state[3][1];
+    state[3][1] = temp;
+
+    // Rotate second row 2 columns to left  
+    temp        = state[0][2];
+    state[0][2] = state[2][2];
+    state[2][2] = temp;
+
+    temp        = state[1][2];
+    state[1][2] = state[3][2];
+    state[3][2] = temp;
+
+    // Rotate third row 3 columns to left
+    temp        = state[0][3];
+    state[0][3] = state[3][3];
+    state[3][3] = state[2][3];
+    state[2][3] = state[1][3];
+    state[1][3] = temp;
+}
+
+uVar x_time(LibGen& circuit, uVar& value) {
+    uVar value1 = circuit.create_constant(8, 0x00);
+    for (int i = 1; i < 8; i++) { value1.wires[i] = value.wires[i-1]; }
+
+    uVar hex_0x1b = circuit.create_constant( 8, 0x1b );
+
+    uVar value2 = circuit.create_constant( 8, 0x00 );
+    value2.wires[0] = value.wires[7];
+
+    uVar mult_16(16);
+    circuit.multiplication( value2, hex_0x1b, mult_16 );
+
+    uVar mult_8(8);
+    for (int i = 0; i < 8; i++) { mult_8.wires[i] = mult_16.wires[i]; }
+
+    circuit.XOR( value1, mult_8, value1 );
+
+    return value1;
+}
+
+void mix_columns(LibGen& circuit, std::vector<std::vector<uVar>>& state) {
+    uVar tmp(8), tm(8), t(8);
+
+    for(uint8_t i = 0; i < 4; ++i) {  
+        t   = state[i][0];
+
+        //tmp = state[i][0] ^ state[i][1] ^ state[i][2] ^ state[i][3] ;
+        circuit.XOR( state[i][0], state[i][1], tmp );
+        circuit.XOR( tmp, state[i][2], tmp );
+        circuit.XOR( tmp, state[i][3], tmp );
+
+        //tm  = state[i][0] ^ state[i][1] ; tm = xtime(tm);  state[i][0] ^= tm ^ tmp ;
+        circuit.XOR( state[i][0], state[i][1], tm );
+        tm = x_time(circuit, tm);
+        circuit.XOR( tm, tmp, state[i][0] );
+
+        //tm  = state[i][1] ^ state[i][2] ; tm = xtime(tm);  state[i][1] ^= tm ^ tmp ;
+        circuit.XOR( state[i][1], state[i][2], tm );
+        tm = x_time(circuit, tm);
+        circuit.XOR( tm, tmp, state[i][1] );
+
+        //tm  = state[i][2] ^ state[i][3] ; tm = xtime(tm);  state[i][2] ^= tm ^ tmp ;
+        circuit.XOR( state[i][2], state[i][3], tm );
+        tm = x_time(circuit, tm);
+        circuit.XOR( tm, tmp, state[i][2] );
+
+        //tm  = state[i][3] ^ t ;           tm = xtime(tm);  state[i][3] ^= tm ^ tmp ;
+        circuit.XOR( state[i][3], t, tm );
+        tm = x_time(circuit, tm);
+        circuit.XOR( tm, tmp, state[i][3] );
+    }
+}
+
 void key_expansion(LibGen& circuit, std::vector<uVar>& key, std::vector<uVar>& round_key) {
 
     // First round key is the key itself
-    for (int i = 0; i < Nk; i++) {
+    for (int i = 0; i < Nk; ++i) {
         round_key[(i * 4) + 0] = key[(i * 4) + 0];
         round_key[(i * 4) + 1] = key[(i * 4) + 1];
         round_key[(i * 4) + 2] = key[(i * 4) + 2];
@@ -85,13 +198,10 @@ void key_expansion(LibGen& circuit, std::vector<uVar>& key, std::vector<uVar>& r
     std::vector<uVar> tempa( 4, uVar(8) );
 
     // The other round keys are found from the previous keys
-    for (int i = 4; i < (Nb * (Nr + 1)); i++) {
-        for (int j = 0; j < 4; j++) {
-            tempa[j] = round_key[ (i - 1) * 4 + j ];
-        }
+    for (int i = 4; i < (Nb * (Nr + 1)); ++i) {
+        for (int j = 0; j < 4; ++j) { tempa[j] = round_key[ (i - 1) * 4 + j ]; }
 
         if (i % Nk == 0) {
-
             // Rotates word
             uVar k = tempa[0];
             tempa[0] = tempa[1];
@@ -105,7 +215,9 @@ void key_expansion(LibGen& circuit, std::vector<uVar>& key, std::vector<uVar>& r
             tempa[2] = get_sbox_value(circuit, tempa[2]);
             tempa[3] = get_sbox_value(circuit, tempa[3]);
 
-            circuit.XOR( tempa[0], circuit.create_constant(8, rcon[i/Nk]), tempa[0] );
+            uVar rcon_value = circuit.create_constant(8, rcon[i/Nk]);
+
+            circuit.XOR( tempa[0], rcon_value, tempa[0] );
         }
         else if (Nk > 6 && i % Nk == 4) {
             // Sub word
@@ -122,8 +234,19 @@ void key_expansion(LibGen& circuit, std::vector<uVar>& key, std::vector<uVar>& r
     }
 }
 
-void encrypt(LibGen& circuit, std::vector<uVar>& key, std::vector<uVar>& plain_text, std::vector<uVar>& cipher_text) {
-    //add_round_key();
+void encrypt(LibGen& circuit, std::vector<uVar>& round_key, std::vector<std::vector<uVar>>& state) {
+    add_round_key(circuit, 0, round_key, state);
+
+    for (uint8_t round = 1; round < Nr; ++round) {
+        sub_bytes(circuit, state);
+        shift_rows(state);
+        mix_columns(circuit, state);
+        add_round_key(circuit, round, round_key, state);
+    }
+
+    sub_bytes(circuit, state);
+    shift_rows(state);
+    add_round_key(circuit, Nr, round_key, state);
 }
 
 /******************/
@@ -150,10 +273,21 @@ void generate() {
     for (auto & byte : key) circuit_generator.add_input(byte);
     for (auto & byte : plain_text) circuit_generator.add_input(byte);
 
+    // Temporary Matrices
+    std::vector<std::vector<uVar>> plain_text_matrix(4, std::vector<uVar>(4));
+    std::vector<std::vector<uVar>> cipher_text_matrix(4, std::vector<uVar>(4));
+    array_to_matrix(plain_text, plain_text_matrix);
+
     circuit_generator.start();
 
     key_expansion(circuit_generator, key, round_key);
-    encrypt(circuit_generator, round_key, plain_text, cipher_text);
+    //encrypt(circuit_generator, round_key, plain_text, cipher_text);
+    encrypt(circuit_generator, round_key, plain_text_matrix);
+
+    matrix_to_array(plain_text_matrix, plain_text);
+
+    for (auto & byte : plain_text) circuit_generator.INV(byte, byte);
+    for (auto & byte : plain_text) circuit_generator.INV(byte, byte);
 
     circuit_generator.conclude();
 
@@ -161,20 +295,62 @@ void generate() {
     for (auto & byte : cipher_text) circuit_generator.add_output(byte);
 }
 
-typedef uint8_t state_t[4][4];
-
-void test2(state_t test) {}
-
 void test() {
-    /* uint8_t values[16] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+    /*
+    plain-text:
+        6bc1bee22e409f96e93d7e117393172a
+        ae2d8a571e03ac9c9eb76fac45af8e51
+        30c81c46a35ce411e5fbc1191a0a52ef
+        f69f2445df4f9b17ad2b417be66c3710
 
-    test2(values);
-    
-    https://github.com/haslab/CircGen/blob/master/cdg/test/bcircuits/crypto/aes-tab-sbox.c
+    key:
+        2b7e151628aed2a6abf7158809cf4f3c
+
+    resulting cipher
+        3ad77bb40d7a3660a89ecaf32466ef97 
+        f5d3d58503b9699de785895a96fdbaaf 
+        43b1cd7f598ece23881b00e3ed030688 
+        7b0c785e27e8ad3f8223207104725dd4 
     */
+
+    std::vector<uint8_t> key        = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };
+    std::vector<uint8_t> plain_text = { 0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a };
+
+    std::vector<uint8_t> inputs;
+    for (auto & val : key) {
+        for (int i = 0; i < 8; i++) {
+            inputs.push_back( (val >> i) & 0x01 );
+        }
+    }
+    for (auto & val : plain_text) {
+        for (int i = 0; i < 8; i++) {
+            inputs.push_back( (val >> i) & 0x01 );
+        }
+    }
+
+    LibTest circuit_tester( "LibscapiCircuit_aes_ecb_encryption.txt" );
+
+    circuit_tester.run( inputs );
+}
+
+void test2() {
+    std::string values = "00011100100011111101110101101110101110001110011011011111011110110110100010001100111010001111000010000001011100110000100111010011";
+    std::vector<uint8_t> cipher(16, 0x00);
+
+    for (int i = 0; i < 16; i++) {
+        for (int j = 0; j < 8; j++) {
+            std::string value_str = " ";
+            value_str[0] = values[i * 8 + j];
+            int value_i = std::stoi(value_str);
+            uint8_t value = value_i;
+            cipher[i] |= ( value << j );
+        }
+        printf("%d ", cipher[i]);
+    } printf("\n");
 }
 
 int main(int argc, char* argv[]) {
+    if (argc > 2) { test2(); return 0; }
     if (argc <= 1) generate();
     else test();
 

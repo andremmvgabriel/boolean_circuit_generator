@@ -53,23 +53,11 @@ target_link_libraries( AES_ECB_Encryption_Circuit
     BooleanCircuits
 )
 
-add_executable( QDOT_Decryptor_Circuit
-    qdot_decryptor_function.cpp
-)
-target_link_libraries( QDOT_Decryptor_Circuit
-    BooleanCircuits
-)
+#add_executable( QDOT_Decryptor_Circuit qdot_decryptor_function.cpp )
+#target_link_libraries( QDOT_Decryptor_Circuit BooleanCircuits )
 
-add_executable( QDOT_Average_Circuit
-    qdot_average.cpp
-)
-target_link_libraries( QDOT_Average_Circuit
-    BooleanCircuits
-)
+#add_executable( QDOT_Average_Circuit qdot_average.cpp )
+#target_link_libraries( QDOT_Average_Circuit BooleanCircuits )
 
-add_executable( QDOT_Scaled_Average_Circuit
-    qdot_scaled_average.cpp
-)
-target_link_libraries( QDOT_Scaled_Average_Circuit
-    BooleanCircuits
-)
+#add_executable( QDOT_Scaled_Average_Circuit qdot_scaled_average.cpp )
+#target_link_libraries( QDOT_Scaled_Average_Circuit BooleanCircuits )
