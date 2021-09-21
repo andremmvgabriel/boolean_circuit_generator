@@ -267,47 +267,35 @@ void generate() {
 
     // Input and Output variables
     std::vector<uVar> key( KEYLEN, uVar(8) );
-    std::vector<uVar> plain_text( KEYLEN, uVar(8) );
-    std::vector<uVar> cipher_text( KEYLEN, uVar(8) );
+    std::vector<uVar> plain_cipher( KEYLEN, uVar(8) );
 
     // Other variables
     std::vector<uVar> round_key( KEYLEN*(Nr+1), uVar(8) );
 
     // Adds the inputs
     for (auto & byte : key) circuit_generator.add_input(byte);
-    for (auto & byte : plain_text) circuit_generator.add_input(byte);
+    for (auto & byte : plain_cipher) circuit_generator.add_input(byte);
 
     // Temporary Matrices
-    std::vector<std::vector<uVar>> plain_text_matrix(4, std::vector<uVar>(4));
-    std::vector<std::vector<uVar>> cipher_text_matrix(4, std::vector<uVar>(4));
+    std::vector<std::vector<uVar>> plain_cipher_matrix(4, std::vector<uVar>(4));
 
-    array_to_matrix(plain_text, plain_text_matrix);
+    array_to_matrix(plain_cipher, plain_cipher_matrix);
 
     circuit_generator.start();
 
     key_expansion(circuit_generator, key, round_key);
     //encrypt(circuit_generator, round_key, plain_text, cipher_text);
-    encrypt(circuit_generator, round_key, plain_text_matrix);
+    encrypt(circuit_generator, round_key, plain_cipher_matrix);
 
-    matrix_to_array(plain_text_matrix, plain_text);
+    matrix_to_array(plain_cipher_matrix, plain_cipher);
 
-    for (auto & byte : plain_text) circuit_generator.INV(byte, byte);
-    for (auto & byte : plain_text) circuit_generator.INV(byte, byte);
+    for (auto & byte : plain_cipher) circuit_generator.INV(byte, byte);
+    for (auto & byte : plain_cipher) circuit_generator.INV(byte, byte);
 
     circuit_generator.conclude();
 
     // Adds the outputs
-    //for (auto & byte : cipher_text) circuit_generator.add_output(byte);
-}
-
-std::vector<uint8_t> invert(std::vector<uint8_t> array) {
-    std::vector<uint8_t> output(array.size());
-
-    for (int i = 0; i < array.size(); i++) {
-        output[array.size() - 1 - i] = array[i];
-    }
-
-    return output;
+    for (auto & byte : plain_cipher) circuit_generator.add_output(byte);
 }
 
 void test() {
