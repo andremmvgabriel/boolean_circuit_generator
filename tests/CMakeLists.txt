@@ -53,6 +53,13 @@ target_link_libraries( AES_ECB_Encryption_Circuit
     BooleanCircuits
 )
 
+add_executable( AES_ECB_Decryption_Circuit
+    aes_ecb_decryption_function.cpp
+)
+target_link_libraries( AES_ECB_Decryption_Circuit
+    BooleanCircuits
+)
+
 #add_executable( QDOT_Decryptor_Circuit qdot_decryptor_function.cpp )
 #target_link_libraries( QDOT_Decryptor_Circuit BooleanCircuits )
 
