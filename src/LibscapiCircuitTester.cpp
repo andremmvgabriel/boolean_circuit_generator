@@ -142,9 +142,35 @@ void gabe::circuits::test::LibscapiTester::_print_results() {
             printf("%ld ", wire );
         } printf("\n");
 
-        printf("   - Values: ");
+        printf("   - Values bin: ");
         for (auto & wire : _output_party_wires.at(i)) {
-            printf("%ld ", _wire_values[wire] );
+            printf("%ld", _wire_values[wire] );
         } printf("\n");
+
+        printf("   - Values byte: ");
+        uint8_t val = 0x00;
+        int counter = 0;
+        for (auto & wire : _output_party_wires.at(i)) {
+            val |= ( _wire_values[wire] << counter );
+            counter++;
+            if (counter == 8 || wire == _output_party_wires.at(i).back()) {
+                printf("%ld ", val);
+                val = 0x00;
+                counter = 0;
+            }
+        }
+        printf("\n");
+
+        printf("   - Values hex: ");
+        for (auto & wire : _output_party_wires.at(i)) {
+            val |= ( _wire_values[wire] << counter );
+            counter++;
+            if (counter == 8 || wire == _output_party_wires.at(i).back()) {
+                printf("0x%02x ", val);
+                val = 0x00;
+                counter = 0;
+            }
+        }
+        printf("\n");
     }
 }

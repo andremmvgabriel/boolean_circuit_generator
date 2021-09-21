@@ -116,9 +116,35 @@ void gabe::circuits::test::TesterAbs::_print_results() {
         }
         printf("\n");
 
-        printf("   - Values: ");
+        printf("   - Values bin: ");
         for (uint64_t j = _number_wires_output_parties.at(i); j > 0; j--) {
-            printf("%ld ", _wire_values[_number_wires - assigned + _number_wires_output_parties.at(i) - j] );
+            printf("%ld", _wire_values[_number_wires - assigned + _number_wires_output_parties.at(i) - j] );
+        }
+        printf("\n");
+
+        printf("   - Values byte: ");
+        uint8_t val = 0x00;
+        int counter = 0;
+        for (uint64_t j = _number_wires_output_parties.at(i); j > 0; j--) {
+            val |= ( _wire_values[_number_wires - assigned + _number_wires_output_parties.at(i) - j] << counter );
+            counter++;
+            if (counter == 8 || j == 1) {
+                printf("%ld ", val);
+                val = 0x00;
+                counter = 0;
+            }
+        }
+        printf("\n");
+
+        printf("   - Values hex: ");
+        for (uint64_t j = _number_wires_output_parties.at(i); j > 0; j--) {
+            val |= ( _wire_values[_number_wires - assigned + _number_wires_output_parties.at(i) - j] << counter );
+            counter++;
+            if (counter == 8 || j == 1) {
+                printf("%04x ", val);
+                val = 0x00;
+                counter = 0;
+            }
         }
         printf("\n");
 
