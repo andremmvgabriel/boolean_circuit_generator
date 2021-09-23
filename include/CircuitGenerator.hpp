@@ -9,6 +9,8 @@
 #include <UnsignedVariable.hpp>
 #include <SignedVariable.hpp>
 
+#define ALLOW_OR_GATES 0
+
 namespace gabe
 {
     namespace circuits

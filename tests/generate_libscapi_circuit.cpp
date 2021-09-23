@@ -86,6 +86,11 @@ void test_or() {
 
     circuit_generator.OR(input1, input2, output);
 
+    // DELETE THIS - ONLY HERE TO MAKE SURE THE OUTPUTS ARE THE VERY LAST WIRES
+    circuit_generator.INV(output, output);
+    circuit_generator.INV(output, output);
+
+
     circuit_generator.conclude();
 
     circuit_generator.add_output(output);

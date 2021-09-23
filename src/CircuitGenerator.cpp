@@ -116,6 +116,7 @@ void gabe::circuits::generator::CircuitGenerator::_inv_gate(const Wire& in, Wire
 }
 
 void gabe::circuits::generator::CircuitGenerator::_or_gate(const Wire& in1, const Wire& in2, Wire& out) {
+#if ALLOW_OR_GATES
     // Increments the counters
     _counter_gates++;
     _counter_or_gates++;
@@ -123,6 +124,15 @@ void gabe::circuits::generator::CircuitGenerator::_or_gate(const Wire& in1, cons
     _write_2_1_gate( in1.label, in2.label, _counter_wires, _gates_map["or"] );
 
     out.label = _counter_wires++;
+#else
+    Wire in1_temp;
+    Wire in2_temp;
+
+    _inv_gate(in1, in1_temp);
+    _inv_gate(in2, in2_temp);
+    _and_gate(in1_temp, in2_temp, out);
+    _inv_gate(out, out);
+#endif
 }
 
 void gabe::circuits::generator::CircuitGenerator::start() {
