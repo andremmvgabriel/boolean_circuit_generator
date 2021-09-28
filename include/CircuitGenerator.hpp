@@ -9,7 +9,7 @@
 #include <UnsignedVariable.hpp>
 #include <SignedVariable.hpp>
 
-#define ALLOW_OR_GATES 0
+#define ALLOW_OR_GATES 1
 
 namespace gabe
 {
